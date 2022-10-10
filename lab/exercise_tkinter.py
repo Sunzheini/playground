@@ -1,8 +1,13 @@
 from tkinter import *
+from tkinter import messagebox
+from tkinter import colorchooser
+from tkinter import filedialog
+from tkinter import ttk
+
 
 # General
 window = Tk()               # instantiate an instance of a window
-window.geometry("600x600")  # size
+window.geometry("700x700")  # size
 window.title("Maxi is supermen")   # title of window
 
 icon = PhotoImage(file='../staticfiles/download.png')   # convert image
@@ -48,8 +53,8 @@ button = Button(
     activeforeground='#00FF00',   # stays the same as fg when not clicked
     activebackground='black',    # when clicked
     # state=DISABLED,      # can no longer click on the button
-    image=photo2,
-    compound='bottom',      # image appears underneath the text
+    #image=photo2,
+    #compound='bottom',      # image appears underneath the text
 )
 button.pack()
 
@@ -106,7 +111,246 @@ backspace_button.pack(side=LEFT)
 
 
 # -------------------------------------------------------------
-# Check Buttons - 34:07
+# Check Buttons
+
+def display():
+    if x.get() == 1:
+        print("Agreed")
+
+
+x = IntVar()     # datatype should reflect what is stored in the variable (BooleanVar, StringVar, etc.)
+
+check_button = Checkbutton(
+    window,
+    text='I am supermen',
+    variable=x,
+    onvalue=1,      # by default returns 0 or 1
+    offvalue=0,
+    command=display,
+)
+
+check_button.pack()
+
+# -------------------------------------------------------------
+# Radio Buttons
+
+
+def order():
+    if x.get() == 0:
+        print('pizza')
+
+
+food = ['pizza', 'hamburger', 'hotdog']
+x = IntVar()
+
+for i in range(len(food)):
+    radiobutton = Radiobutton(
+        window,
+        text=food[i],
+        variable=x,             # groups together if they share the same variable
+        value=i,                # assigns each button a different value
+        # indicatoron=False,      # eliminate circle buttons
+        command=order,
+    )
+    radiobutton.pack(anchor='w')    # aligns to west
+
+# -------------------------------------------------------------
+# Sliding Scale
+
+scale = Scale(
+    window,
+    from_=0,
+    to=100,
+    length=100,
+    orient=VERTICAL,
+    tickinterval=5,     # numeric indicators on the scale
+    # showvalue=False,    # hides current value
+    troughcolor='#69EAFF',
+)
+
+scale.set(50)       # sets current value
+
+scale.pack()
+
+# -------------------------------------------------------------
+# List Box
+
+
+def submit():
+    foodz = []
+
+    for j in listbox.curselection():
+        foodz.insert(j, listbox.get(j))
+
+    print(*foodz, end='')
+
+
+def add():
+    listbox.insert(listbox.size(),      # gives us current position on the item we are on
+                   entryBox.get()       # insert a new item
+                   )
+    # listbox.delete(listbox.curselection())      # deletes
+    listbox.config(height=listbox.size())
+
+
+listbox = Listbox(
+    window,
+    bg='#f7ffde',
+    selectmode=MULTIPLE,    # can select multiple items
+)
+
+listbox.pack()
+listbox.insert(1, 'pizza')      # items inside the listbox
+listbox.insert(2, 'hamburger')
+listbox.insert(3, 'doner')
+
+listbox.config(height=listbox.size())        # change height of listbox depending on items
+
+entryBox = Entry(window)
+entryBox.pack()
+
+submit1Button = Button(window, text='submit', command=submit)
+submit1Button.pack()
+
+add1Button = Button(window, text='add', command=add)
+add1Button.pack()
+
+# -------------------------------------------------------------
+# Message Box
+
+
+def somemessage():
+    # messagebox.showinfo(title='info_message', message='Daniel is Noob!!!')    # normal box
+
+    # messagebox.showwarning(title='info_message', message='Daniel is Noob!!!')    # warning box
+    # you can put while 1 for infinite
+
+    # messagebox.showerror(title='info_message', message='Daniel is Noob!!!')  # error box
+
+    # if messagebox.askokcancel(title='info_message', message='Daniel is Noob!!!'):   # choice
+    #     print('yes')
+    # else:
+    #     print('no')
+
+    answer = messagebox.askquestion(title='info_message', message='Daniel is Noob!!!', icon='warning')
+    if answer == 'yes':
+        print('ffff')
+
+
+button_m_b = Button(window, text='messagebox', command=somemessage)
+button_m_b.pack()
+
+# -------------------------------------------------------------
+# Color Picker
+
+
+def colorchooser():
+    color = colorchooser.askcolor()
+    print(color)            # prints ((118, 152, 203), '#7698cb')
+
+
+buttoncolor = Button(window, text='colorpicker', command=colorchooser)
+buttoncolor.place(x=100, y=300)
+
+# -------------------------------------------------------------
+# Text Area
+
+
+def sumbittext():
+    input = text_widget.get('1.0', END)     # get the text
+    print(input)
+
+
+text_widget = Text(window, height=3, width=6)
+text_widget.place(x=100, y=400)
+textbutton = Button(window, command=sumbittext)
+textbutton.place(x=100, y=350)
+
+# -------------------------------------------------------------
+# Opening Files
+def openfile():
+    filepath = filedialog.askopenfilename()     # opens explorer for the file, saving it in 'filepath'
+    # filepath = filedialog.asksaveasfile()     # can also save files
+
+
+filebutton = Button(window, text='openfile', command=openfile)
+filebutton.place(x=150, y=350)
+
+# -------------------------------------------------------------
+# Menu Bar      # like the one on the programs
+
+
+def openFile():
+    print('openFile')
+
+
+def saveFile():
+    print('saveFile')
+
+
+menubar = Menu(window)
+window.config(menu=menubar)
+
+fileMenu = Menu(menubar, tearoff=False)
+menubar.add_cascade(label='File', menu=fileMenu)       # dropdown menu
+fileMenu.add_command(label='Open', command=openFile)
+fileMenu.add_command(label='Save', command=saveFile)
+fileMenu.add_separator()
+fileMenu.add_command(label='Exit', command=quit)
+
+editMenu = Menu(menubar, tearoff=False)
+menubar.add_cascade(label='Edit', menu=fileMenu)
+
+# -------------------------------------------------------------
+# Frame     # a rectangular container to group and hold widgets
+
+frame1 = Frame(window, bg='pink', bd=5, relief=RAISED)
+frame1.place(x=250, y=350)
+
+buttondzw = Button(frame1, text='w')
+buttondza = Button(frame1, text='a')
+buttondzs = Button(frame1, text='s')
+buttondzd = Button(frame1, text='d')
+
+buttondzw.pack(side=TOP)
+buttondza.pack(side=LEFT)
+buttondzs.pack(side=LEFT)
+buttondzd.pack(side=LEFT)
+
+# -------------------------------------------------------------
+# New Windows
+
+
+def createwindow():
+    new_window = Toplevel()     # new window on top of other windows, linked to a botton window
+
+    # new_window = Tk()       # independent window
+    # window.destroy()        # close the old window
+
+
+Button(window, text='create', command=createwindow).place(x=350, y=350)
+
+# -------------------------------------------------------------
+# Separate Tabs
+
+notebook = ttk.Notebook(window)     # manages a collection of windows and displays
+tab1 = Frame(notebook)      # new frame for tab1
+tab2 = Frame(notebook)
+
+notebook.add(tab1, text='tab 1')
+notebook.add(tab2, text='tab 2')
+notebook.place(x=50, y=50)
+
+Label(tab1, text='Hello tab1').pack()
+Label(tab2, text='Hello tab2').pack()
+
+# -------------------------------------------------------------
+# Grid Geometry Manager - 2:27:00
+
+
+
+
+
 
 
 
