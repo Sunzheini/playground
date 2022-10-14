@@ -7,15 +7,15 @@ import time
 
 
 # # General
-# window = Tk()               # instantiate an instance of a window
-# window.geometry("700x700")  # size
-# window.title("Maxi is supermen")   # title of window
-#
-# icon = PhotoImage(file='../staticfiles/download.png')   # convert image
-# window.iconphoto(True, icon)    # change icon image
-#
-# window.config(background='#2b2828')     # window background
-#
+window = Tk()               # instantiate an instance of a window
+window.geometry("700x700")  # size
+window.title("Maxi is supermen")   # title of window
+
+icon = PhotoImage(file='../staticfiles/download.png')   # convert image
+window.iconphoto(True, icon)    # change icon image
+
+window.config(background='#2b2828')     # window background
+
 #
 # # -------------------------------------------------------------
 # # Labels
@@ -305,18 +305,18 @@ import time
 # # -------------------------------------------------------------
 # # Frame     # a rectangular container to group and hold widgets
 #
-# frame1 = Frame(window, bg='pink', bd=5, relief=RAISED)
-# frame1.place(x=250, y=350)
-#
-# buttondzw = Button(frame1, text='w')
-# buttondza = Button(frame1, text='a')
-# buttondzs = Button(frame1, text='s')
-# buttondzd = Button(frame1, text='d')
-#
-# buttondzw.pack(side=TOP)
-# buttondza.pack(side=LEFT)
-# buttondzs.pack(side=LEFT)
-# buttondzd.pack(side=LEFT)
+frame1 = Frame(window, bg='pink', bd=5, relief=RAISED)
+frame1.place(x=250, y=350)
+
+buttondzw = Button(frame1, text='w')
+buttondza = Button(frame1, text='a')
+buttondzs = Button(frame1, text='s')
+buttondzd = Button(frame1, text='d')
+
+buttondzw.pack(side=TOP)
+buttondza.pack(side=LEFT)
+buttondzs.pack(side=LEFT)
+buttondzd.pack(side=LEFT)
 #
 # # -------------------------------------------------------------
 # # New Windows
@@ -441,49 +441,49 @@ import time
 # -------------------------------------------------------------
 # Animations
 
-WIDTH = 500
-HEIGHT = 500
-
-xVelocity = 3
-yVelocity = 2
-
-window4 = Tk()
-
-canvas = Canvas(window4, width=WIDTH, height=HEIGHT)
-canvas.pack()
-
-bg_image = PhotoImage(file='../staticfiles/desert.png')
-background = canvas.create_image(0, 0, image=bg_image, anchor=NW)
-
-photo_image = PhotoImage(file='../staticfiles/cactus.png')
-my_image = canvas.create_image(0, 0, image=photo_image, anchor=NW)
-
-image_width = photo_image.width()
-image_height = photo_image.height()
-
-while True:
-    coordinates = canvas.coords(my_image)       # get coordinates
-    print(coordinates)
-
-    if coordinates[0] >= (WIDTH - image_width) or coordinates[0] < 0:
-        xVelocity = -xVelocity
-    canvas.move(my_image, xVelocity, 0)     # move with destination velocity
-
-    if coordinates[1] >= (HEIGHT - image_height) or coordinates[1] < 0:
-        yVelocity = -yVelocity
-    canvas.move(my_image, xVelocity, yVelocity)
-
-    window4.update()
-    time.sleep(0.01)
+# WIDTH = 500
+# HEIGHT = 500
+#
+# xVelocity = 3
+# yVelocity = 2
+#
+# window4 = Tk()
+#
+# canvas = Canvas(window4, width=WIDTH, height=HEIGHT)
+# canvas.pack()
+#
+# bg_image = PhotoImage(file='../staticfiles/desert.png')
+# background = canvas.create_image(0, 0, image=bg_image, anchor=NW)
+#
+# photo_image = PhotoImage(file='../staticfiles/cactus.png')
+# my_image = canvas.create_image(0, 0, image=photo_image, anchor=NW)
+#
+# image_width = photo_image.width()
+# image_height = photo_image.height()
+#
+# while True:
+#     coordinates = canvas.coords(my_image)       # get coordinates
+#     print(coordinates)
+#
+#     if coordinates[0] >= (WIDTH - image_width) or coordinates[0] < 0:
+#         xVelocity = -xVelocity
+#     canvas.move(my_image, xVelocity, 0)     # move with destination velocity
+#
+#     if coordinates[1] >= (HEIGHT - image_height) or coordinates[1] < 0:
+#         yVelocity = -yVelocity
+#     canvas.move(my_image, xVelocity, yVelocity)
+#
+#     window4.update()
+#     time.sleep(0.01)
 
 
 
 # -------------------------------------------------------------
 
-# window.mainloop()           # display window, listen for events
+window.mainloop()           # display window, listen for events
 # window2.mainloop()
 # window3.mainloop()
-window4.mainloop()
+# window4.mainloop()
 
 
 
