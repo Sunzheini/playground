@@ -16,15 +16,10 @@ class Controller:
     def add_aquarium(self, aquarium_type: str, aquarium_name: str):
         try:
             new_aquarium = self.aquarium_factory.create_aquarium(aquarium_type, aquarium_name)
+            self.aquariums.append(new_aquarium)
+            return f"Successfully added {aquarium_type}."
         except ValueError as error:
-            return
-
-        self.aquariums.append(new_aquarium)
-        return f"Successfully added {aquarium_type}."
-
-
-# 1:09
-
+            return str(error)
 
     def add_decoration(self, decoration_type: str):
         if decoration_type == 'Ornament':
