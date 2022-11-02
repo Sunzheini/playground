@@ -16,6 +16,10 @@ window.iconphoto(True, icon)    # change icon image
 
 window.config(background='#2b2828')     # window background
 
+
+# frame1.pack_propagate = False     # child widgets do not modify parent
+
+
 #
 # # -------------------------------------------------------------
 # # Labels
@@ -51,6 +55,7 @@ window.config(background='#2b2828')     # window background
 #     font=("Comic Sans", 15),
 #     fg='#00FF00',
 #     bg='black',
+#     cursor='hand2',
 #     activeforeground='#00FF00',   # stays the same as fg when not clicked
 #     activebackground='black',    # when clicked
 #     # state=DISABLED,      # can no longer click on the button
