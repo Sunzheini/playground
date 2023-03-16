@@ -21,6 +21,7 @@ proxy-tools==0.1.0
 PyAutoGUI==0.9.53
 pycparser==2.21
 pydantic==1.10.2
+PyDirectInput==1.0.4
 pygame==2.1.2
 PyGetWindow==0.0.9
 PyMsgBox==1.0.9
