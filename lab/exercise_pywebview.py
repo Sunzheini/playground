@@ -6,9 +6,13 @@ import webview
 
 
 def start_webview():
-    window = webview.create_window('Dox Mng',
-                                   'http://localhost:8000/',
-                                   confirm_close=True, width=900, height=600)
+    window = webview.create_window('erp-demo',
+                                   # 'http://localhost:8000/',
+                                   'https://erp-demo.herokuapp.com/',
+                                   confirm_close=True,
+                                   width=1920,
+                                   height=1200,
+                                   )
     webview.start()
     window.closed = os._exit(0)
 
@@ -23,5 +27,5 @@ def start_startdjango():
 
 
 if __name__ == '__main__':
-    Thread(target=start_startdjango).start()
+    # Thread(target=start_startdjango).start()
     start_webview()
