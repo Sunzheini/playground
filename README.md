@@ -1,2 +1,1 @@
-# playground
- 
+This is a playground I use to test new topics I learn in python
