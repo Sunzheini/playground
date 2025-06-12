@@ -1,6 +1,9 @@
 import asyncio
 import time
 
+# check asyncio.gather and asyncio.wait
+
+
 async def sleep():
     print(f'Time: {time.time() - start:.2f}')
     await asyncio.sleep(1)
