@@ -1,7 +1,16 @@
 
--- Start (W1/9) --
-Start the project to have something to upload
-Pick a cloud platform (Render, AWS/GCP/Azure). / Softuni
+-- Prototype (W1/9) --
+1. Purpose
+2. User stories
+3. Models: auditor, audit, report
+4. Django MVP (minimum viable product), main pages in django templates, leave some of the user stories for later
+5. Wireframes w/ navigation between pages and functions
+6. Future of the project. incl. scaling
+7. Define the architecture and components of the app: frontend, backend, db, etc.
+8. Picking the stack: django, react, postgres, langchain, gcp
+9. Develop the MVP
+10. Deploy: Render
+11. Deploy: GCP
 
 
 -- System and backend performance (W2/9) -- 
