@@ -1,9 +1,10 @@
+
+-- Start (W1/9) --
 Start the project to have something to upload
+Pick a cloud platform (Render, AWS/GCP/Azure). / Softuni
 
-Pick a cloud platform (AWS/GCP/Azure). / Softuni
 
-
--- System and backend performance -- 
+-- System and backend performance (W2/9) -- 
 Load balancing: NGINX (also consider cloud-based solutions like AWS ALB/ELB)
 Queues: Celery, RabbitMQ (good for most async tasks), Kafka (better for high-throughput event streaming)
 Cashing: Redis (also useful for rate limiting & session storage)
@@ -12,7 +13,7 @@ Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 App: messaging system
 
 
--- AI & LLM integration --  (LangCHain, Ollama, LlamaIndex)
+-- AI & LLM integration (W3/9) --  (LangCHain, Ollama, LlamaIndex)
 Prompt chaining / multistep workflows
 Token limits and context window
 System prompts vs user prompts
@@ -22,7 +23,7 @@ LLM Training on data. TensorFlow, Pytorch, Hugging Face
 App: Pdf Q&A Bot
 
 
--- Deployment --
+-- Deployment (W4/9) --
 Docker and Containerization, Kubernetes for orchestrating docker containers
 Deploy with Vercel and Render
 CI/CD: GitHub Actions
@@ -33,11 +34,23 @@ Rollback and recovery strategies, recovering data
 Orchestration: Airflow, Perfect
 
 
--- API Integration and Design -- 
+-- API Integration and Design (W5/9) -- 
 REST vs GraphQL, gRPC for internal microservices
 Design: naming, versioning, HTTP status codes
 Authentication / Authorization: API keys, JWT tokens, OAuth 2.0
 Pagination, rate limiting, backoff and retries
+
+
+-- Python (W6/9) --
+
+
+-- Django + Postgres (W7/9) --
+
+
+-- React (W8/9) --
+
+
+-- Python algorithms (W9/9) --
 
 
 -------------------------------------------------------------------------
