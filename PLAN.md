@@ -8,7 +8,7 @@
 6. Future of the project. incl. scaling
 7. Define the architecture and components of the app: frontend, backend, db, etc.
 8. Picking the stack: django, react, postgres, langchain, gcp
-9. Develop the MVP
+9. Develop the MVP (make it as a template for the future)
 10. Deploy: Render
 11. Deploy: GCP
 
@@ -22,7 +22,7 @@ Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 App: messaging system
 
 
--- AI & LLM integration (W3/9) --  (LangCHain, Ollama, LlamaIndex)
+-- AI & LLM integration (W3/9) --  (LangChain, Ollama, LlamaIndex, Langflow)
 Prompt chaining / multistep workflows
 Token limits and context window
 System prompts vs user prompts
@@ -50,7 +50,7 @@ Authentication / Authorization: API keys, JWT tokens, OAuth 2.0
 Pagination, rate limiting, backoff and retries
 
 
--- Python (W6/9) --
+-- Python (W6/9) + alternatives to pip --
 
 
 -- Django + Postgres (W7/9) --
