@@ -1,28 +1,33 @@
 
--- Prototype (W1/9) --
+-- Prototype (W1/9, 2/9) --
 1. Purpose
 2. User stories
 3. Models: auditor, audit, report
 4. Django MVP (minimum viable product), main pages in django templates, leave some of the user stories for later
-5. Wireframes w/ navigation between pages and functions
+5. Wireframes w/ navigation between pages and functions (+ https://getbootstrap.com/)
 6. Future of the project. incl. scaling
 7. Define the architecture and components of the app: frontend, backend, db, etc.
 8. Picking the stack: django, react, postgres, langchain, gcp
 9. Develop the MVP (make it as a template for the future)
-10. Deploy: Render
-11. Deploy: GCP
+
+here
+10. Deploy: Render + postgres
+docker video
+PostgreSQL-Installation-Guide.pdf
+
+11. Deploy: GCP (there is an open chat with DeepSeek)
 
 
--- System and backend performance (W2/9) -- 
+-- System and backend performance (W3/9) -- 
 Load balancing: NGINX (also consider cloud-based solutions like AWS ALB/ELB)
-Queues: Celery, RabbitMQ (good for most async tasks), Kafka (better for high-throughput event streaming)
+Queues: Celery, RabbitMQ (good for most async tasks), Kafka (better for high-throughput event streaming) + Presentation
 Cashing: Redis (also useful for rate limiting & session storage)
 CDN caching (Cloudflare, Fastly) for static assets
 Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 App: messaging system
 
 
--- AI & LLM integration (W3/9) --  (LangChain, Ollama, LlamaIndex, Langflow)
+-- AI & LLM integration (W4/9) --  (LangChain, Ollama, LlamaIndex, Langflow)
 Prompt chaining / multistep workflows
 Token limits and context window
 System prompts vs user prompts
@@ -32,7 +37,7 @@ LLM Training on data. TensorFlow, Pytorch, Hugging Face
 App: Pdf Q&A Bot
 
 
--- Deployment (W4/9) --
+-- Deployment (W5/9) --
 Docker and Containerization, Kubernetes for orchestrating docker containers
 Deploy with Vercel and Render
 CI/CD: GitHub Actions
@@ -43,20 +48,17 @@ Rollback and recovery strategies, recovering data
 Orchestration: Airflow, Perfect
 
 
--- API Integration and Design (W5/9) -- 
-REST vs GraphQL, gRPC for internal microservices
+-- API Integration and Design (W6/9) -- 
+REST vs GraphQL, gRPC for internal microservices (+Django REST Framework presentation)
 Design: naming, versioning, HTTP status codes
 Authentication / Authorization: API keys, JWT tokens, OAuth 2.0
 Pagination, rate limiting, backoff and retries
 
 
--- Python (W6/9) + alternatives to pip --
+-- Python (W7/9) + alternatives to pip --, Pydantic 
 
 
--- Django + Postgres (W7/9) --
-
-
--- React (W8/9) --
+-- React (W8/9) -- +usage of scss, state‑management (React Query, Zustand)
 
 
 -- Python algorithms (W9/9) --
