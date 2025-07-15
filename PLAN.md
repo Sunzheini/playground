@@ -30,6 +30,7 @@ Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 
 
 -- Python algorithms (next) + data structures
+https://softuni.bg/trainings/resources/video/73528/video-atanas-atanasov-algorithms-with-python-july-2022/3817
 
 
 -- Python (Holy1) + alternatives to pip, Pydantic, common libs
