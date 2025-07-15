@@ -21,15 +21,15 @@ CI/CD: GitHub Actions
 Monitoring and logging tools: Grafana
 
 
--- System and backend performance (friday) -- 
-Load balancing: NGINX (also consider cloud-based solutions like AWS ALB/ELB)
+-- System and backend performance (friday) --
+(55min) https://softuni.bg/trainings/resources/video/87083/video-02-august-2023-doncho-minkov-python-web-framework-june-2023/4110
 Queues: Celery, RabbitMQ (good for most async tasks), Kafka (better for high-throughput event streaming) + Presentation
 Cashing: Redis (also useful for rate limiting & session storage)
 CDN caching (Cloudflare, Fastly) for static assets
 Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 
 
--- Python algorithms (last) --
+-- Python algorithms (next) + data structures
 
 
 -- Python (Holy1) + alternatives to pip, Pydantic, common libs
