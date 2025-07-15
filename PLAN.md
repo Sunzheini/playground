@@ -29,7 +29,8 @@ CDN caching (Cloudflare, Fastly) for static assets
 Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 
 
--- Python algorithms (next) + data structures
+-- Python algorithms (next):
+https://softuni.bg/trainings/3817/algorithms-with-python-july-2022#lesson-44103
 https://softuni.bg/trainings/resources/video/73528/video-atanas-atanasov-algorithms-with-python-july-2022/3817
 
 

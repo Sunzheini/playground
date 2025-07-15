@@ -123,6 +123,51 @@ def get_labyrinth_info(rows, cols, matrix):
 
 # 8- Queens problem: Place 8 queens on a chessboard such that no two queens threaten each other.
 
+def is_safe(board, row, col):
+    # Check this column on upper side
+    for i in range(row):
+        if board[i][col] == 'Q':
+            return False
+
+    # Check upper diagonal on left side
+    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+        if j < 0:
+            break
+        if board[i][j] == 'Q':
+            return False
+
+    # Check upper diagonal on right side
+    for i, j in zip(range(row, -1, -1), range(col, len(board))):
+        if j >= len(board):
+            break
+        if board[i][j] == 'Q':
+            return False
+
+    return True
+
+
+def solve_n_queens_util(board, row):
+    if row >= len(board):
+        for r in board:
+            print(' '.join(r))
+        print()
+        return
+
+    for col in range(len(board)):
+        if is_safe(board, row, col):
+            board[row][col] = 'Q'  # Place queen
+
+            solve_n_queens_util(board, row + 1)  # Recur to place rest of the queens
+
+            board[row][col] = '-'  # Backtrack
+
+
+def solve_n_queens(n):
+    board = [['-' for _ in range(n)] for _ in range(n)]
+    solve_n_queens_util(board, 0)
+
+
+solve_n_queens(4)  # Example for 4-Queens problem
 
 
 
