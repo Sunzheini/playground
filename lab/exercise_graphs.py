@@ -132,8 +132,8 @@ def dfs_start(graph):
         dfs(node, graph, visited)
 
 
-dfs_start(directional_graph_dfs)
-print()
+# dfs_start(directional_graph_dfs)
+# print()
 
 # ------------------------------------------------------------------
 
@@ -175,8 +175,8 @@ def bfs_start(graph):
         dfs(node, graph, visited)
 
 
-bfs_start(directional_graph_bfs)
-print()
+# bfs_start(directional_graph_bfs)
+# print()
 
 # ------------------------------------------------------------------
 
@@ -212,10 +212,46 @@ graph_dag = {
 }
 
 
-sorted_order = topological_sort(graph_dag)
-print("Topological Sort Order:", sorted_order)
+# sorted_order = topological_sort(graph_dag)
+# print("Topological Sort Order:", sorted_order)
 
 # ------------------------------------------------------------------
+
+# Shortest Path in an unweighted graph with BFS
+
+from collections import deque  # Required for BFS queue
+
+def shortest_path_bfs(graph, start, end):
+    visited = set()
+    queue = deque([(start, [start])])  # Store tuples of (current_node, path)
+    visited.add(start)
+    while queue:
+        current, path = queue.popleft()
+        if current == end:
+            return path  # Return the path when the end node is reached
+        for neighbor in graph.get(current, []):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append((neighbor, path + [neighbor]))
+    return None  # Return None if no path is found
+
+
+# Example usage of shortest path BFS
+graph_shortest_path = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D'],
+    'C': ['A', 'D'],
+    'D': ['B', 'C', 'E'],
+    'E': ['D']
+}
+
+
+path = shortest_path_bfs(graph_shortest_path, 'A', 'E')  # Corrected parameter order
+print("Shortest Path from A to E:", path if path else "No path found")
+
+# ------------------------------------------------------------------
+
+# Dijkstra's Algorithm for Shortest Path in a weighted graph
 
 
 
