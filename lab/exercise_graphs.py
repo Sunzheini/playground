@@ -246,12 +246,87 @@ graph_shortest_path = {
 }
 
 
-path = shortest_path_bfs(graph_shortest_path, 'A', 'E')  # Corrected parameter order
-print("Shortest Path from A to E:", path if path else "No path found")
+# path = shortest_path_bfs(graph_shortest_path, 'A', 'E')  # Corrected parameter order
+# print("Shortest Path from A to E:", path if path else "No path found")
 
 # ------------------------------------------------------------------
 
 # Dijkstra's Algorithm for Shortest Path in a weighted graph
+# Assumptions:
+# - Weights on edges are non-negative
+# - Edges can be directed or undirected
+
+import heapq  # Required for priority queue in Dijkstra's algorithm
+
+def dijkstra(graph, start):
+    # Initialize distances and priority queue
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    priority_queue = [(0, start)]  # (distance, node)
+
+    while priority_queue:
+        current_distance, current_node = heapq.heappop(priority_queue)
+
+        if current_distance > distances[current_node]:
+            continue
+
+        for neighbor, weight in graph[current_node].items():
+            distance = current_distance + weight
+
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(priority_queue, (distance, neighbor))
+
+    return distances
+
+
+# Example usage of Dijkstra's algorithm
+graph_dijkstra = {
+    'A': {'B': 1, 'C': 4},
+    'B': {'A': 1, 'D': 2, 'E': 5},
+    'C': {'A': 4, 'D': 1},
+    'D': {'B': 2, 'C': 1, 'E': 3},
+    'E': {'B': 5, 'D': 3}
+}
+
+
+distances = dijkstra(graph_dijkstra, 'A')
+print("Dijkstra's Distances from A:", distances)
+
+# ------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
