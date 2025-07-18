@@ -21,20 +21,20 @@ CI/CD: GitHub Actions
 Monitoring and logging tools: Grafana
 
 
--- System and backend performance (friday) --
-(55min) https://softuni.bg/trainings/resources/video/87083/video-02-august-2023-doncho-minkov-python-web-framework-june-2023/4110
+-- System and backend performance --
+Asynchronous tasks in Django
 Queues: Celery, RabbitMQ (good for most async tasks), Kafka (better for high-throughput event streaming) + Presentation
 Cashing: Redis (also useful for rate limiting & session storage)
 CDN caching (Cloudflare, Fastly) for static assets
 Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 
 
--- Python algorithms (next):
-https://softuni.bg/trainings/resources/video/74073/video-atanas-atanasov-algorithms-with-python-july-2022/3817 (0:34)
-https://softuni.bg/trainings/resources/video/73533/video-atanas-atanasov-algorithms-with-python-july-2022/3817
-https://softuni.bg/trainings/resources/video/74346/video-04-august-2022-atanas-atanasov-algorithms-with-python-july-2022/3817
+-- Python algorithms (videos) --
 
--- Python (Holy1) + alternatives to pip, Pydantic, common libs
+
+-> here
+-- 3 days Python (Holy1) + alternatives to pip, Pydantic, common libs
+-- 2 days again deploy to gcp, try also others
 
 
 -- React (Holy2)

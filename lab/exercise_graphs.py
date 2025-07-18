@@ -290,30 +290,152 @@ graph_dijkstra = {
 }
 
 
-distances = dijkstra(graph_dijkstra, 'A')
-print("Dijkstra's Distances from A:", distances)
+# distances = dijkstra(graph_dijkstra, 'A')
+# print("Dijkstra's Distances from A:", distances)
 
 # ------------------------------------------------------------------
 
+# Bellman-Ford Algorithm for Shortest Path in a weighted graph with negative weights
+
+def bellman_ford(graph, start):
+    # Initialize distances
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+
+    # Relax edges repeatedly
+    for _ in range(len(graph) - 1):
+        for node in graph:
+            for neighbor, weight in graph[node].items():
+                if distances[node] + weight < distances[neighbor]:
+                    distances[neighbor] = distances[node] + weight
+
+    # Check for negative-weight cycles
+    for node in graph:
+        for neighbor, weight in graph[node].items():
+            if distances[node] + weight < distances[neighbor]:
+                raise ValueError("Graph contains a negative-weight cycle")
+
+    return distances
 
 
+# Example usage of Bellman-Ford algorithm
+graph_bellman_ford = {
+    'A': {'B': 1, 'C': 4},
+    'B': {'A': 1, 'D': 2, 'E': 5},
+    'C': {'A': 4, 'D': 1},
+    'D': {'B': 2, 'C': 1, 'E': -3},  # Negative weight edge
+    'E': {'B': 5, 'D': 3}
+}
 
 
+# distances_bellman_ford = bellman_ford(graph_bellman_ford, 'A')
+# print("Bellman-Ford Distances from A:", distances_bellman_ford)
+
+# ------------------------------------------------------------------
+
+# Spanning tree: A subgraph that includes all vertices and is a tree (connected and acyclic)
+
+# Minimum Spanning Tree (MST): The spanning tree with the minimum total edge weight
+# Minimum Spanning Forest (MSF): A spanning forest that includes all vertices and is a tree for each connected component
 
 
+# Kruskal's Algorithm for Minimum Spanning Tree (MST)
+
+def kruskal(graph):
+    # Convert graph to edge list
+    edges = []
+    for node, neighbors in graph.items():
+        for neighbor, weight in neighbors.items():
+            edges.append((weight, node, neighbor))
+
+    # Sort edges by weight
+    edges.sort()
+
+    parent = {}
+    rank = {}
+
+    def find(node):
+        if parent[node] != node:
+            parent[node] = find(parent[node])
+        return parent[node]
+
+    def union(node1, node2):
+        root1 = find(node1)
+        root2 = find(node2)
+        if root1 != root2:
+            if rank[root1] > rank[root2]:
+                parent[root2] = root1
+            elif rank[root1] < rank[root2]:
+                parent[root1] = root2
+            else:
+                parent[root2] = root1
+                rank[root1] += 1
+
+    # Initialize disjoint set
+    for node in graph:
+        parent[node] = node
+        rank[node] = 0
+
+    mst_edges = []
+    for weight, u, v in edges:
+        if find(u) != find(v):
+            union(u, v)
+            mst_edges.append((u, v, weight))
+
+    return mst_edges
 
 
+# Example usage of Kruskal's algorithm
+graph_kruskal = {
+    'A': {'B': 1, 'C': 4},
+    'B': {'A': 1, 'D': 2, 'E': 5},
+    'C': {'A': 4, 'D': 1},
+    'D': {'B': 2, 'C': 1, 'E': 3},
+    'E': {'B': 5, 'D': 3}
+}
 
 
+# mst_edges = kruskal(graph_kruskal)
+# print("Kruskal's Minimum Spanning Tree Edges:")
+# for u, v, weight in mst_edges:
+#     print(f"{u} - {v}: {weight}")
+# ------------------------------------------------------------------
+
+# Prim's Algorithm for Minimum Spanning Tree (MST)
+
+def prim(graph, start):
+    mst_edges = []
+    visited = set([start])
+    edges = [(weight, start, neighbor) for neighbor, weight in graph[start].items()]
+    heapq.heapify(edges)
+
+    while edges:
+        weight, u, v = heapq.heappop(edges)
+        if v not in visited:
+            visited.add(v)
+            mst_edges.append((u, v, weight))
+            for next_neighbor, next_weight in graph[v].items():
+                if next_neighbor not in visited:
+                    heapq.heappush(edges, (next_weight, v, next_neighbor))
+
+    return mst_edges
 
 
+# Example usage of Prim's algorithm
+graph_prim = {
+    'A': {'B': 1, 'C': 4},
+    'B': {'A': 1, 'D': 2, 'E': 5},
+    'C': {'A': 4, 'D': 1},
+    'D': {'B': 2, 'C': 1, 'E': 3},
+    'E': {'B': 5, 'D': 3}
+}
 
 
-
-
-
-
-
+# mst_edges_prim = prim(graph_prim, 'A')
+# print("Prim's Minimum Spanning Tree Edges:")
+# for u, v, weight in mst_edges_prim:
+#     print(f"{u} - {v}: {weight}")
+# ------------------------------------------------------------------
 
 
 
