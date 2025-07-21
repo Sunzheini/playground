@@ -1,5 +1,4 @@
 from time import sleep
-
 from pywinauto.application import Application
 import pywinauto.mouse as mouse
 import pywinauto.keyboard as keyboard
