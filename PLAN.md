@@ -32,11 +32,10 @@ Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 -- Python algorithms (videos) --
 
 
+-- Python (Holy1) + alternatives to pip, Pydantic, common libs
+
+
 -> here
--- 3 days Python (Holy1) + alternatives to pip, Pydantic, common libs
--- 2 days again deploy to gcp, try also others
-
-
 -- React (Holy2)
 Create React app
 Django REST Framework for API: +Django REST Framework presentation
@@ -62,7 +61,11 @@ System prompts vs user prompts
 Memory strategies: MangCHain memory or vector memory
 RAG (Retrieval-Augmented Generation) to fetch data before prompting
 LLM Training on data. TensorFlow, Pytorch, Hugging Face
+Firecrawl (scrape web into LLM): https://www.youtube.com/watch?v=xekw62yQu14&ab_channel=TechWithTim
 App: Pdf Q&A Bot
+
+
+Improve security of the deployed app and also follow the suggestions from the chat
 
 
 -------------------------------------------------------------------------
