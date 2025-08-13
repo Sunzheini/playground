@@ -39,6 +39,8 @@ Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 -- React (Holy2)
 Create React app
 Django REST Framework for API: +Django REST Framework presentation
+https://leetcode.com/problems/two-sum/description/
+https://customtkinter.tomschimansky.com/
 
 
 -- React Deployment (Aug1)
@@ -55,6 +57,7 @@ https://www.youtube.com/watch?v=EBtpgEg7fvw&list=PLP1wVgC2olQhENJhh7OuCHfujQ92GD
 
 
 -- AI & LLM integration (Aug2) --  (LangChain, Ollama, LlamaIndex, Langflow)
+AI Agents and LLMs (Large Language Models): create and orchestrate AI agents
 Prompt chaining / multistep workflows
 Token limits and context window
 System prompts vs user prompts
