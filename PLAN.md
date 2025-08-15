@@ -35,12 +35,23 @@ Throughput, Latency, Rate limiting, Connection pools, Read replicas: ?
 -- Python (Holy1) + alternatives to pip, Pydantic, common libs
 
 
--> here
 -- React (Holy2)
-Create React app
+Create React app: 
 Django REST Framework for API: +Django REST Framework presentation
-https://leetcode.com/problems/two-sum/description/
-https://customtkinter.tomschimansky.com/
+julie
+
+
+-> here
+-- AI & LLM integration (Aug2) --  (LangChain, Ollama, LlamaIndex, Langflow)
+AI Agents and LLMs (Large Language Models): create and orchestrate AI agents
+Prompt chaining / multistep workflows
+Token limits and context window
+System prompts vs user prompts
+Memory strategies: MangCHain memory or vector memory
+RAG (Retrieval-Augmented Generation) to fetch data before prompting
+LLM Training on data. TensorFlow, Pytorch, Hugging Face
+Firecrawl (scrape web into LLM): https://www.youtube.com/watch?v=xekw62yQu14&ab_channel=TechWithTim
+App: Pdf Q&A Bot
 
 
 -- React Deployment (Aug1)
@@ -54,18 +65,6 @@ Terraform for infrastructure as code (IaC) - softuni 2xvideos
 Deploy: GCP: 
 https://www.youtube.com/watch?v=sqUuofLBfFw&list=PLP1wVgC2olQhENJhh7OuCHfujQ92GDqoJ&index=5&ab_channel=NeuralNine
 https://www.youtube.com/watch?v=EBtpgEg7fvw&list=PLP1wVgC2olQhENJhh7OuCHfujQ92GDqoJ&index=7&ab_channel=ProgrammingKnowledge
-
-
--- AI & LLM integration (Aug2) --  (LangChain, Ollama, LlamaIndex, Langflow)
-AI Agents and LLMs (Large Language Models): create and orchestrate AI agents
-Prompt chaining / multistep workflows
-Token limits and context window
-System prompts vs user prompts
-Memory strategies: MangCHain memory or vector memory
-RAG (Retrieval-Augmented Generation) to fetch data before prompting
-LLM Training on data. TensorFlow, Pytorch, Hugging Face
-Firecrawl (scrape web into LLM): https://www.youtube.com/watch?v=xekw62yQu14&ab_channel=TechWithTim
-App: Pdf Q&A Bot
 
 
 Improve security of the deployed app and also follow the suggestions from the chat

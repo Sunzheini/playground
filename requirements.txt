@@ -18,6 +18,8 @@ comtypes==1.2.0
 configobj==5.0.8
 configparser==5.3.0
 cryptography==40.0.2
+customtkinter==5.2.2
+darkdetect==0.8.0
 et-xmlfile==1.1.0
 etelemetry==0.3.0
 fastapi==0.85.1
