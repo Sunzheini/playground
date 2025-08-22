@@ -4,7 +4,6 @@ def count_up_to(max):
         yield count  # Pauses here, returns count
         count += 1   # Resumes here when next() is called
 
-
 # Usage:
 counter = count_up_to(5)
 print(next(counter))  # 1
