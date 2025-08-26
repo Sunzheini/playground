@@ -10,6 +10,6 @@ def measure_and_print_time_decorator(function):
         end_time = perf_counter()
 
         elapsed_time = end_time - start_time
-        print(f"Elapsed Time: {elapsed_time:.6f} seconds")
+        print(f"{function.__name__}: {elapsed_time:.6f} seconds")
         return result
     return wrapper

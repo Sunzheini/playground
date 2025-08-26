@@ -1,9 +1,9 @@
 import asyncio
 import time
-from asyncio import get_event_loop, sleep, gather, wait, new_event_loop, set_event_loop, create_task, run
 
 from projects.concurrent_and_parallel.core.cmd_menu import CommandMenu
-from projects.concurrent_and_parallel.core.measure_and_print_time_decorator import measure_and_print_time_decorator
+from projects.concurrent_and_parallel.helpers.measure_and_print_time_decorator import measure_and_print_time_decorator
+from projects.concurrent_and_parallel.workers.custom_thread_worker import CustomThreadWorker
 
 """
 Continue with:
@@ -17,6 +17,7 @@ coroutine: an async def function
 """
 
 
+# Synchronous
 @measure_and_print_time_decorator
 def function_1():
     for a in range(2):
@@ -28,35 +29,37 @@ def function_1():
         time.sleep(1)
 
 
+# Asynchronous
 @measure_and_print_time_decorator
 def function_2():
     async def counting1():
         for a in range(2):
             print(f"counting1: {a}")
-            await sleep(1)
+            await asyncio.sleep(1)
 
     async def counting2():
         for b in range(2):
             print(f"counting2: {b}")
-            await sleep(1)
+            await asyncio.sleep(1)
 
-    # long version: create and close the loop manually -------------------------
-    # loop = new_event_loop() # create a new event loop every time
-    # set_event_loop(loop)
-    #
-    # coroutine1 = loop.create_task(counting1())  # create a coroutine object
-    # coroutine2 = loop.create_task(counting2())
-    #
-    # loop.run_until_complete(wait([coroutine1, coroutine2]))
-    # loop.close()  # close the loop
-    # -------------------------------------------------------------------------
-
-    # short version: use asyncio.run() ----------------------------------------
     async def start():                  # must be wrapped in a function no directly: run(gather(...))
         await asyncio.gather(counting1(), counting2())
 
     asyncio.run(start())
-    # -----------------------------------------------------------------------------
+
+
+# Threading
+def function_3():
+    start = time.perf_counter()
+    worker1 = CustomThreadWorker(target=function_1, args=())
+    worker2 = CustomThreadWorker(target=function_1, args=())
+
+    worker1.start()
+    worker2.start()
+    worker1.join()
+    worker2.join()
+    end = time.perf_counter()
+    print(f"Total time taken in threads: {end - start} seconds")
 
 
 if __name__ == "__main__":
@@ -64,6 +67,7 @@ if __name__ == "__main__":
         {
             '1': function_1,
             '2': function_2,
+            '3': function_3,
         }
     )
     menu.run()  # then run the function by their name
