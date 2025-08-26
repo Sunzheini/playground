@@ -1,7 +1,21 @@
-# Multiprocessing
 from multiprocessing import Process, cpu_count
 import time
 
+"""
+✅ Best for:
+    CPU-bound tasks (compute-heavy)
+    
+    Tasks that require true parallel execution without GIL interference 
+    (GUI frameworks run in a single main thread, and blocking operations freeze the event loop.)
+    (Tkinter does not natively support async/await)!
+    
+    Independent processes, often large-scale computation
+
+⏳ Behavior:
+    Runs in separate processes, separate memory
+    Each process has its own Python interpreter, so GIL is not a bottleneck
+    More memory and setup overhead than threads or asyncio
+"""
 
 def counter(num):
     count = 0
