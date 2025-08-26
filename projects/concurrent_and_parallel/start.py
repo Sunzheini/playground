@@ -1,10 +1,4 @@
-def run_program(*args, **kwargs):
-    if args:
-        print(f"args: {', '.join(str(arg) for arg in args)}")
-    if kwargs:
-        print(f"kwargs: {kwargs}")
-
-
+from projects.concurrent_and_parallel.core.cmd_menu import CommandMenu
 """
 Continue with:
 https://realpython.com/async-io-python/
@@ -13,5 +7,10 @@ Deepseek conversation
 """
 
 
+
+
+
+
 if __name__ == "__main__":
-    run_program(4, 5)
+    menu = CommandMenu()
+    menu.run()

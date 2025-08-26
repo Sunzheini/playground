@@ -340,7 +340,6 @@ def main17():
     # The file is automatically closed after the with block
     print("File written and closed automatically.")
 
-
 # -----------------------------------------------------------
 
 
