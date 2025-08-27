@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String, create_engine
 
 Base = declarative_base()   # It creates a base class that your ORM models will inherit from
 
+
 class User(Base):
     __tablename__ = 'users'  # Name of the table in the database
 

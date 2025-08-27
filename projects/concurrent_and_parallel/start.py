@@ -129,11 +129,17 @@ def producer(q):
     q.put(None)     # signal that production is done
 
 def consumer(q):
+    workers = []
+
     while True:
-        item = q.get()
-        if item is None:    # check for the signal
+        item = q.get()  # blocks until the producer puts something in, it will start consuming as soon as the first item is produced
+        if item is None:
             break
-        print(f'Consumed: {item}')
+        worker = CustomThreadWorker(target=sleeper_function, args=(2,))
+        workers.append(worker)
+        worker.start()
+
+    [w.join() for w in workers]
 
 
 @measure_and_print_time_decorator
