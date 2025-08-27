@@ -1,5 +1,8 @@
 import asyncio
 import time
+from multiprocessing import Queue, Process
+from random import random
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -56,9 +59,8 @@ def function_2():
 
 
 # Threading
+@measure_and_print_time_decorator
 def function_3():
-    start = time.perf_counter()
-
     worker1 = CustomThreadWorker(target=function_1, args=())
     worker2 = CustomThreadWorker(target=sleeper_function, args=(5, ))
 
@@ -67,31 +69,88 @@ def function_3():
     worker1.join()
     worker2.join()
 
-    end = time.perf_counter()
-    print(f"Total time taken in threads: {end - start} seconds")
-
 
 # Threading with web scraping
+@measure_and_print_time_decorator
 def function_4():
-    start = time.perf_counter()
-
     link = 'https://en.wikipedia.org/wiki/Fortune_500'
     target_class = 'wikitable'
-    scraper1 = CustomScraper(link, target_class)
+    scraper1 = CustomScraper(link)
 
     # scraper1.get_results()
     # sleeper_function(2)     # 2.32
 
-    worker1 = CustomThreadWorker(target=scraper1.get_results, args=())
+    worker1 = CustomThreadWorker(target=scraper1.get_results, args=('', 'table', 'class', target_class))
     worker2 = CustomThreadWorker(target=sleeper_function, args=(2, ))
 
     worker1.start()
     worker2.start()
-    worker1.join()
-    worker2.join()  # 2.00
 
-    end = time.perf_counter()
-    print(f"Total time taken in threads: {end - start} seconds")
+    worker1.join()
+    worker2.join()  # 2.00, without the part below
+
+    # phase 2 - multiple workers
+    list_of_subworkers = []
+    for i in range(scraper1.total_results):
+        sub_worker = CustomThreadWorker(target=sleeper_function, args=(3, ))
+        list_of_subworkers.append(sub_worker)
+        sub_worker.start()
+
+    [sub_worker.join() for sub_worker in list_of_subworkers]  # 5.00
+
+
+# ------------------------------------------------------------------------------------------------
+# function_5    # multiprocessing.Queue
+"""
+Producer runs in its own process → scrapes, spawns threads, collects results → puts results into the multiprocessing.Queue.
+Consumer runs in its own process → continuously get()s items from the queue → stops when it sees the None sentinel.
+Queue is shared between processes because multiprocessing.Queue is designed for inter-process communication.
+"""
+# ------------------------------------------------------------------------------------------------
+def producer(q):
+    link = 'https://en.wikipedia.org/wiki/Fortune_500'
+    target_class = 'wikitable'
+
+    for i in range(3):
+        scraper = CustomScraper(link)
+
+        worker1 = CustomThreadWorker(target=scraper.get_results, args=('', 'table', 'class', target_class))
+        worker2 = CustomThreadWorker(target=sleeper_function, args=(2,))
+
+        worker1.start()
+        worker2.start()
+
+        worker1.join()
+        worker2.join()
+
+        result = random()
+        q.put(result)       # you cannot put worker in the queue
+
+    q.put(None)     # signal that production is done
+
+def consumer(q):
+    while True:
+        item = q.get()
+        if item is None:    # check for the signal
+            break
+        print(f'Consumed: {item}')
+
+
+@measure_and_print_time_decorator
+def function_5():
+    queue = Queue()
+
+    process1 = Process(target=producer, args=(queue, ))
+    process2 = Process(target=consumer, args=(queue, ))
+
+    process1.start()
+    process2.start()
+
+    process1.join()
+    process2.join()
+
+
+# ------------------------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
@@ -101,6 +160,7 @@ if __name__ == "__main__":
             '2': function_2,
             '3': function_3,
             '4': function_4,
+            '5': function_5,
         }
     )
     menu.run()  # then run the function by their name
