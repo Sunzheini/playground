@@ -4,6 +4,7 @@ from multiprocessing import Queue, Process
 from random import random
 
 import requests
+from async_timeout import timeout
 from bs4 import BeautifulSoup
 
 from lab.exercise_beautiful_soup import CustomScraper
@@ -100,7 +101,7 @@ def function_4():
 
 
 # ------------------------------------------------------------------------------------------------
-# function_5    # multiprocessing.Queue
+# function_5    # multiprocessing.Queue: 2 processes, each with multiple threads and a shared queue
 """
 Producer runs in its own process → scrapes, spawns threads, collects results → puts results into the multiprocessing.Queue.
 Consumer runs in its own process → continuously get()s items from the queue → stops when it sees the None sentinel.
@@ -132,7 +133,12 @@ def consumer(q):
     workers = []
 
     while True:
-        item = q.get()  # blocks until the producer puts something in, it will start consuming as soon as the first item is produced
+        try:
+            item = q.get(timeout=10)  # blocks until the producer puts something in, it will start consuming as soon as the first item is produced
+        except Exception as e:
+            print(f"Consumer timed out waiting for item: {e}")
+            break
+
         if item is None:
             break
         worker = CustomThreadWorker(target=sleeper_function, args=(2,))

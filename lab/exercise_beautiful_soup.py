@@ -48,7 +48,7 @@ class CustomScraper:
                 cols = [col.get_text(strip=True) for col in cols]
 
                 self.total_results += 1
-                # print(cols)
+                print(cols)
 
 
 if __name__ == '__main__':
