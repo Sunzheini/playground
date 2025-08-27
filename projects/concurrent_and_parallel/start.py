@@ -1,20 +1,27 @@
 import asyncio
 import time
+import requests
+from bs4 import BeautifulSoup
 
+from lab.exercise_beautiful_soup import CustomScraper
 from projects.concurrent_and_parallel.core.cmd_menu import CommandMenu
 from projects.concurrent_and_parallel.helpers.measure_and_print_time_decorator import measure_and_print_time_decorator
 from projects.concurrent_and_parallel.workers.custom_thread_worker import CustomThreadWorker
 
 """
 Continue with:
+Udemy course + openai chat
 https://realpython.com/async-io-python/
-Udemy course
 Deepseek conversation
 """
 
 """
 coroutine: an async def function
 """
+
+
+def sleeper_function(seconds):
+    time.sleep(seconds)
 
 
 # Synchronous
@@ -51,13 +58,38 @@ def function_2():
 # Threading
 def function_3():
     start = time.perf_counter()
+
     worker1 = CustomThreadWorker(target=function_1, args=())
-    worker2 = CustomThreadWorker(target=function_1, args=())
+    worker2 = CustomThreadWorker(target=sleeper_function, args=(5, ))
 
     worker1.start()
     worker2.start()
     worker1.join()
     worker2.join()
+
+    end = time.perf_counter()
+    print(f"Total time taken in threads: {end - start} seconds")
+
+
+# Threading with web scraping
+def function_4():
+    start = time.perf_counter()
+
+    link = 'https://en.wikipedia.org/wiki/Fortune_500'
+    target_class = 'wikitable'
+    scraper1 = CustomScraper(link, target_class)
+
+    # scraper1.get_results()
+    # sleeper_function(2)     # 2.32
+
+    worker1 = CustomThreadWorker(target=scraper1.get_results, args=())
+    worker2 = CustomThreadWorker(target=sleeper_function, args=(2, ))
+
+    worker1.start()
+    worker2.start()
+    worker1.join()
+    worker2.join()  # 2.00
+
     end = time.perf_counter()
     print(f"Total time taken in threads: {end - start} seconds")
 
@@ -68,6 +100,7 @@ if __name__ == "__main__":
             '1': function_1,
             '2': function_2,
             '3': function_3,
+            '4': function_4,
         }
     )
     menu.run()  # then run the function by their name
