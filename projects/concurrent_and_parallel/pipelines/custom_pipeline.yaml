@@ -1,0 +1,54 @@
+# Pipeline configuration for function_5: a producer process and a consumer process
+# Each process spawns several thread workers while sharing a multiprocessing.Queue
+
+version: 1
+
+queues:
+  - name: InterProcessQueue
+    type: multiprocessing.Queue
+    description: A queue that allows inter-process communication between producer and consumer processes
+    maxsize: 0  # 0 means infinite size in multiprocessing.Queue
+
+processes:
+  - name: producer
+    module: projects.concurrent_and_parallel.start
+    target: producer
+    args:
+      - "${queues.InterProcessQueue}"
+    threads:
+      - name: scraper_worker
+        class: projects.concurrent_and_parallel.workers.custom_thread_worker.CustomThreadWorker
+        target: projects.concurrent_and_parallel.start.sleeper_function  # placeholder for thread target examples
+        args: [2]
+      - name: io_worker
+        class: projects.concurrent_and_parallel.workers.custom_thread_worker.CustomThreadWorker
+        target: projects.concurrent_and_parallel.start.sleeper_function
+        args: [2]
+
+  - name: consumer
+    module: projects.concurrent_and_parallel.start
+    target: consumer
+    args:
+      - "${queues.InterProcessQueue}"
+    threads:
+      - name: consumer_worker
+        class: projects.concurrent_and_parallel.workers.custom_thread_worker.CustomThreadWorker
+        target: projects.concurrent_and_parallel.start.sleeper_function
+        args: [2]
+
+jobs:
+  - name: run_function_5
+    description: Starts producer and consumer processes that communicate over InterProcessQueue
+    entrypoint:
+      module: projects.concurrent_and_parallel.start
+      function: function_5
+    uses:
+      queue: InterProcessQueue
+      processes:
+        - producer
+        - consumer
+
+# Notes:
+# - This YAML is declarative. A separate loader/executor can read it with PyYAML,
+#   create the Queue, spawn processes with the specified targets, and create threads as listed.
+# - The placeholders under threads illustrate the per-process thread configuration.

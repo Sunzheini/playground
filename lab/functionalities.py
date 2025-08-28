@@ -341,6 +341,17 @@ def main17():
     print("File written and closed automatically.")
 
 # -----------------------------------------------------------
+# venv commands
+# -----------------------------------------------------------
+"""
+# python -m venv venv_name      # create a virtual environment
+# {venv_folder_name}\Scripts\activate     # activate the virtual environment on Windows
+# source venv_name/bin/activate  # activate the virtual environment on macOS/Linux
+# deactivate                     # deactivate the virtual environment
+# pip install package_name       # install a package in the virtual environment
+# pip freeze > requirements.txt  # save installed packages to a requirements file
+# pip install -r requirements.txt # install packages from a requirements file
+"""
 
 
 

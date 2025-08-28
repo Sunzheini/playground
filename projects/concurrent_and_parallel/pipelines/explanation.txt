@@ -1,0 +1,2 @@
+run_pipeline.py runs the specified pipeline script with the given input and output files.
+it is the same as if you ran `function_5` in `start.py`

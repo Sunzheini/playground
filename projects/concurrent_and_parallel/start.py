@@ -54,9 +54,9 @@ def function_2():
             await asyncio.sleep(1)
 
     async def start():                  # must be wrapped in a function no directly: run(gather(...))
-        await asyncio.gather(counting1(), counting2())
+        await asyncio.gather(counting1(), counting2())  # gather runs them concurrently
 
-    asyncio.run(start())
+    asyncio.run(start())    # run starts and closes the loop
 
 
 # Threading
