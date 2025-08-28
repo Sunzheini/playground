@@ -1,5 +1,5 @@
-import asyncio
 import time
+import asyncio
 from multiprocessing import Queue, Process
 from random import random
 

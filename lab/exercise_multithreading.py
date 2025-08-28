@@ -60,7 +60,7 @@ code inside the with lock: block.
 
 def increment():
     global counter
-    for _ in range(100000):
+    for _ in range(4000000):
         with lock:
 
             """
