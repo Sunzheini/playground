@@ -1,7 +1,10 @@
-import threading
 import socket
+import threading
 
 
+# ------------------------------------------------------
+# Sockets
+# ------------------------------------------------------
 def start_server(server_ready_event):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(('localhost', 65432))  # Bind to localhost and port 65432
@@ -39,7 +42,7 @@ def start_client():
     client_socket.close()
 
 
-def execute():
+def main():
     # Create an event to signal when the server is ready
     server_ready_event = threading.Event()
 
@@ -67,4 +70,4 @@ def execute():
 
 
 if __name__ == "__main__":
-    execute()
+    main()

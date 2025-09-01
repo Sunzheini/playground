@@ -3,18 +3,27 @@
 # -----------------------------------------------------------------------------------
 
 class Singleton:
-    _instance = None
+    _INSTANCE = None
+    _INITIALIZED = False
 
     def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
+        if not cls._INSTANCE is None:
+            cls._instance = super().__new__(cls)
+        return cls._INSTANCE
+
+    def __init__(self, name: str):
+        if not self._INITIALIZED:
+            self.name = name
+            self._INITIALIZED = True
+
+    def __str__(self):
+        return f"Singleton instance with name: {self.name}"
 
 
-singleton1 = Singleton()
-singleton2 = Singleton()
-
-print(singleton1 is singleton2)  # True
+obj1 = Singleton("First")
+obj2 = Singleton("Second")
+print(obj1)  # Singleton instance with name: First
+print(obj2)  # Singleton instance with name: First
 
 
 # -----------------------------------------------------------------------------------
