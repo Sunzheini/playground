@@ -12,17 +12,6 @@ from projects.concurrent_and_parallel.core.cmd_menu import CommandMenu
 from projects.concurrent_and_parallel.helpers.measure_and_print_time_decorator import measure_and_print_time_decorator
 from projects.concurrent_and_parallel.workers.custom_thread_worker import CustomThreadWorker
 
-"""
-Continue with:
-Udemy course + openai chat
-https://realpython.com/async-io-python/
-Deepseek conversation
-"""
-
-"""
-coroutine: an async def function
-"""
-
 
 def sleeper_function(seconds):
     time.sleep(seconds)
@@ -43,10 +32,11 @@ def function_1():
 # Asynchronous
 @measure_and_print_time_decorator
 def function_2():
+    # async specifies that this is a coroutine
     async def counting1():
         for a in range(2):
             print(f"counting1: {a}")
-            await asyncio.sleep(1)
+            await asyncio.sleep(1)      # waits for the sleep without blocking the loop
 
     async def counting2():
         for b in range(2):
@@ -107,7 +97,6 @@ Producer runs in its own process → scrapes, spawns threads, collects results �
 Consumer runs in its own process → continuously get()s items from the queue → stops when it sees the None sentinel.
 Queue is shared between processes because multiprocessing.Queue is designed for inter-process communication.
 """
-# ------------------------------------------------------------------------------------------------
 def producer(q):
     link = 'https://en.wikipedia.org/wiki/Fortune_500'
     target_class = 'wikitable'
@@ -128,6 +117,7 @@ def producer(q):
         q.put(result)       # you cannot put worker in the queue
 
     q.put(None)     # signal that production is done
+
 
 def consumer(q):
     workers = []
@@ -163,6 +153,10 @@ def function_5():
 
 
 # ------------------------------------------------------------------------------------------------
+# Multiprocessing
+@measure_and_print_time_decorator
+def function_6():
+    pass
 
 
 if __name__ == "__main__":
@@ -173,6 +167,7 @@ if __name__ == "__main__":
             '3': function_3,
             '4': function_4,
             '5': function_5,
+            '6': function_6,
         }
     )
     menu.run()  # then run the function by their name

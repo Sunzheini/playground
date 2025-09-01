@@ -29,7 +29,7 @@ def counter(num, q=None):
 def several_processes():
     start = time.perf_counter()
 
-    print(cpu_count())      # how many I have - 12
+    print(cpu_count())      # how many I have - 12 (threads, 6 cores)
 
     # counter(50000000)
     # counter(50000000)   # 3.85
