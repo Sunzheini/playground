@@ -274,12 +274,20 @@ markers =
     unit: marks tests as unit tests
 """
 
+
+# to debug right click on the test and select "Debug ..."
+# pytest - k "llm_query" to execute a test by keyword
+
+
 # ============= RUNNING THE TESTS =============
 """
 Basic commands:
 
 # Run all tests
 pytest
+
+# Run all tests and see print statements
+pytest -s
 
 # Run with verbose output
 pytest -v
