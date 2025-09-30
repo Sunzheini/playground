@@ -177,6 +177,59 @@ def function_4():
     asyncio.run(main())
 
 
+# --- When to use asyncio.run, create_task, to_thread ---
+# Use asyncio.run(coro) to start the event loop and run a top-level coroutine.
+#   - Typical for scripts, main entry points, or testing async code.
+#   - Only call once per program (it creates and closes the event loop).
+#
+# Use asyncio.create_task(coro) to schedule a coroutine to run concurrently in the background.
+#   - Only use inside an already running event loop (i.e., inside async functions).
+#   - Lets you start multiple async tasks and await them later (e.g., with asyncio.gather).
+#
+# Use asyncio.to_thread(func, *args) to run blocking (sync) code in a separate thread from async code.
+#   - Useful for file I/O, CPU-bound, or legacy sync functions that would block the event loop.
+#   - Returns a coroutine you can await in async code.
+
+# --- asyncio.create_task example ---
+def example_create_task():
+    async def _process_job(job_id):
+        print(f"Start job {job_id}")
+        await asyncio.sleep(1)
+        print(f"End job {job_id}")
+        return f"Job {job_id} done"
+
+    async def main():
+        # Schedule jobs concurrently
+        tasks = [asyncio.create_task(_process_job(i)) for i in range(3)]
+        # Await all jobs
+        results = await asyncio.gather(*tasks)
+        print("Results:", results)
+
+    asyncio.run(main())
+
+# --- asyncio.to_thread example ---
+def example_to_thread():
+    import os
+    def blocking_file_write(filename, text):
+        with open(filename, "w") as f:
+            f.write(text)
+        return f"Written to {filename}"
+
+    async def main():
+        filename = "asyncio_to_thread_example.txt"
+        result = await asyncio.to_thread(blocking_file_write, filename, "Hello from to_thread!")
+        print(result)
+        # Clean up
+        if os.path.exists(filename):
+            os.remove(filename)
+
+    asyncio.run(main())
+
+# Uncomment to run examples:
+# example_create_task()
+# example_to_thread()
+
+
 if __name__ == "__main__":
     start_time = time.perf_counter()
 
