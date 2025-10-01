@@ -143,6 +143,12 @@ ui.json({...})                                       <pre>{...}</pre>           
 .classes('rounded-lg')            border-radius: 0.5rem;                        Large border radius
 .classes('rounded-full')          border-radius: 9999px;                        Full rounded (circles)
 
+### Shadows
+.classes('shadow')                box-shadow: 0 1px 3px 0 #0000001a, 0 1px 2px 0 #0000000f;             Small shadow
+.classes('shadow-md')             box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -1px #0000000f;       Medium shadow
+.classes('shadow-lg')             box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -2px #0000000f;     Large shadow
+.classes('shadow-none')           box-shadow: none;                                                     No shadow
+
 ### Text size
 .classes('text-sm')               font-size: 0.875rem; line-height: 1.25rem;    Small text
 .classes('text-base')             font-size: 1rem; line-height: 1.5rem;         Base text (default)
@@ -178,12 +184,6 @@ ui.json({...})                                       <pre>{...}</pre>           
 .classes('grid-cols-3')           grid-template-columns: repeat(3, minmax(0, 1fr));     3 columns
 .classes('grid-cols-4')           grid-template-columns: repeat(4, minmax(0, 1fr));     4 columns
 
-### Shadows
-.classes('shadow')                box-shadow: 0 1px 3px 0 #0000001a, 0 1px 2px 0 #0000000f;             Small shadow
-.classes('shadow-md')             box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -1px #0000000f;       Medium shadow
-.classes('shadow-lg')             box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -2px #0000000f;     Large shadow
-.classes('shadow-none')           box-shadow: none;                                                     No shadow
-
 ### Hover Effects
 .classes('hover:bg-blue-600')     (on hover) background-color: #2563eb;                                             Darker blue on hover
 .classes('hover:shadow-lg')       (on hover) box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -2px #0000000f;      Larger shadow on hover
@@ -211,6 +211,15 @@ Primary button
 .classes('px-3 py-1 bg-gray-200 text-gray-800 rounded')                  
 padding-left: 0.75rem; padding-right: 0.75rem; padding-top: 0.25rem; padding-bottom: 0.25rem; background-color: #e5e7eb; color: #1f2937; border-radius: 0.25rem;                               
 Secondary button
+
+with ui.button('Options', icon='menu'):
+    with ui.menu():  # This creates the dropdown
+        ui.menu_item('Edit')
+        ui.menu_item('Delete')
+        ui.separator()
+        ui.menu_item('Settings')
+
+ui.button('Options', icon='menu' on_click=lambda: click(number, default_text)).classes('px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300')
 
 ### COMMON COMBINATIONS: Inputs
 .classes('p-2 border rounded w-full')           
