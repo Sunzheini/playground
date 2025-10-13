@@ -7,7 +7,9 @@ from sqlalchemy import create_engine, text  # SQLAlchemy for DB connection and S
 from sqlalchemy.orm import declarative_base, sessionmaker  # ORM base and session maker
 import psycopg2  # Add psycopg2 for direct DB connection
 
-# Get DB connection details from environment variables or use defaults
+# ----------------------------------------------------------------------------------------------------
+# Settings
+# ----------------------------------------------------------------------------------------------------
 DB_NAME = os.getenv("DB_NAME", "fastapi_db")  # Target database name
 DB_USER = os.getenv("DB_USER", "postgres_user")  # DB username
 DB_PASSWORD = os.getenv("DB_PASSWORD", "password")  # DB password
