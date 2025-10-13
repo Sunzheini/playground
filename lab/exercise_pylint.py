@@ -21,7 +21,8 @@ pylint --reports=no --score=yes exercise_pylint.py
 pylint my_package/
 
 # Analyze entire project
-pylint . (inside project root)
+pylint . (inside project root) # but this will include venv and other folders
+pylint --ignore-paths=".*venv.*|.*\.idea.*|.*migrations.*|.*test.*|.*__pycache__.*" .          # ignore common folders
 """"" 
 import os,sys
 myVar=10
