@@ -11,7 +11,7 @@ import os
 import hashlib
 from typing import Optional
 
-from sqlalchemy import create_engine, text, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import declarative_base, sessionmaker
 from pydantic import BaseModel, Field
 import psycopg2
