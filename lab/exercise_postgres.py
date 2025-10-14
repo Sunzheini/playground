@@ -1,14 +1,20 @@
 """
 You can use the same docker container if you provide a different db name.
 need sqlalchemy and psycopg2 packages
+
+You can check status with pgadmin docker container: admin@admin.com, admin -> fastapi_db -> Schema -> public -> Tables -> Users -> Right click -> View/Edit Data
 """
 import os
-from sqlalchemy import create_engine, text  # SQLAlchemy for DB connection and SQL execution
-from sqlalchemy.orm import declarative_base, sessionmaker  # ORM base and session maker
-import psycopg2  # Add psycopg2 for direct DB connection
+import hashlib
+from typing import Optional
+
+from sqlalchemy import create_engine, text, Column, Integer, String
+from sqlalchemy.orm import declarative_base, sessionmaker
+from pydantic import BaseModel, Field
+import psycopg2
 
 # ----------------------------------------------------------------------------------------------------
-# Settings
+# General Settings
 # ----------------------------------------------------------------------------------------------------
 DB_NAME = os.getenv("DB_NAME", "fastapi_db")  # Target database name
 DB_USER = os.getenv("DB_USER", "postgres_user")  # DB username
@@ -16,12 +22,20 @@ DB_PASSWORD = os.getenv("DB_PASSWORD", "password")  # DB password
 DB_HOST = os.getenv("DB_HOST", "localhost")  # DB host (localhost for local Docker)
 DB_PORT = os.getenv("DB_PORT", "5432")  # DB port (default 5432)
 
-# Connection string for default 'postgres' database (needed to create new DB)
-POSTGRES_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres"
+# POSTGRES_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres"
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 
-def create_database_if_not_exists():
-    """Create the database if it doesn't exist"""
+# Get SHA256 hash of a password
+def get_password_hash(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+# ----------------------------------------------------------------------------------------------------
+# Function to create the database if it doesn't exist with psycopg2
+# ----------------------------------------------------------------------------------------------------
+def create_database_if_not_exists() -> bool:
+    """Create the database if it doesn't exist. Returns True if DB exists or was created, False on failure."""
     try:
         # Use psycopg2 to connect to the default 'postgres' database with autocommit
         conn = psycopg2.connect(
@@ -32,6 +46,7 @@ def create_database_if_not_exists():
             port=DB_PORT
         )
         conn.autocommit = True  # Enable autocommit to allow CREATE DATABASE
+
         with conn.cursor() as cur:
             # Check if the target database already exists
             cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (DB_NAME,))
@@ -44,38 +59,64 @@ def create_database_if_not_exists():
                 print(f"Database '{DB_NAME}' already exists.")
         conn.close()
     except Exception as e:
-        # Handle connection errors (e.g., PostgreSQL not running)
         print(f"Error: Could not connect to PostgreSQL or create database. Make sure PostgreSQL is running.")
         print(f"Details: {e}")
         return False
 
-    return True  # Return True if DB exists or was created
+    return True
 
 
-# Try to create the database first
-if create_database_if_not_exists():
+# ----------------------------------------------------------------------------------------------------
+# SQLAlchemy for ORM and DB management
+# ----------------------------------------------------------------------------------------------------
+BASE = declarative_base()   # Base class for ORM models, other models will inherit from this!
+DB_ENGINE = create_engine(DATABASE_URL, echo=True)     # SQLAlchemy engine for ORM operations
+DB_SESSION_LOCAL = sessionmaker(autocommit=False, autoflush=False, bind=DB_ENGINE)  # Session factory for DB sessions
 
-    # Build connection string for the target database
-    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-    # Create SQLAlchemy engine for ORM operations
-    db_engine = create_engine(DATABASE_URL)
+# -----------------------------------------------------------------------------------------------------
+# Models
+# -----------------------------------------------------------------------------------------------------
+# Pydantic model
+class User(BaseModel):
+    """User model representing a user in the system."""
+    id: Optional[int] = Field(default=None, ge=1, description="Auto-generated positive integer ID")
+    name: str = Field(min_length=1, max_length=100, description="User's full name")
+    age: int = Field(ge=0, le=120, description="User's age between 0 and 120")
+    city: str = Field(min_length=1, max_length=100, description="City name")
+    email: Optional[str] = Field(default=None, description="Valid email address if provided")
+    password_hash: Optional[str] = Field(default=None, description="Hashed password")
 
-    # Create a session factory for DB sessions
-    db_session_local = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
 
-    # Base class for ORM models
-    db_base = declarative_base()
+# SQLAlchemy ORM model
+class SQLAlchemyUser(BASE):
+    __tablename__ = 'Users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+    age = Column(Integer, nullable=False)
+    city = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    password_hash = Column(String, nullable=False)
 
-    # User ORM model matching your in-memory structure
-    from sqlalchemy import Column, Integer, String
-    try:
-        from routers.security import get_password_hash  # Assumes you have this function
-    except ImportError:
-        # Fallback: simple hash for demonstration
-        import hashlib
-        def get_password_hash(password: str) -> str:
-            return hashlib.sha256(password.encode()).hexdigest()
+
+def create_model_in_db(model_instance):
+    """Create a new record in the database for the given model instance."""
+    with DB_SESSION_LOCAL() as session_local:     # Create a new session!
+        session_local.add(model_instance)
+        session_local.commit()
+        session_local.refresh(model_instance)
+    return model_instance
+
+
+# -----------------------------------------------------------------------------------------------------
+# Action
+# -----------------------------------------------------------------------------------------------------
+if create_database_if_not_exists():     # try to create DB if it doesn't exist
+
+
+
+
+    create_db_objects()                 # Initialize DB objects
 
     class User(db_base):
         __tablename__ = 'users'
@@ -86,14 +127,6 @@ if create_database_if_not_exists():
         email = Column(String, nullable=False, unique=True)
         password_hash = Column(String, nullable=False)
 
-    def get_db_session():
-        """
-        Returns a SQLAlchemy session connected to the fastapi_db database.
-        Usage:
-            with get_db_session() as session:
-                # perform queries, inserts, etc.
-        """
-        return db_session_local()
 
     # ----------------------------------------------------------------------------------------------------
     def create_db(engine):
