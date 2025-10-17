@@ -44,7 +44,7 @@ def start_client():
 
 def main():
     # Create an event to signal when the server is ready
-    server_ready_event = threading.Event()
+    server_ready_event = threading.Event()  # avoid race condition, so client waits until server is ready!
 
     # Define the server thread
     def server_thread_function():
