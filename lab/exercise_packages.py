@@ -35,6 +35,6 @@ you should see `  - Installing shared-lib (0.1.0 D:/Study/Projects/Github/AegisA
 
 """
 Updating the shared-lib package:
-1. (optional) version = "0.1.1" in shared-lib/pyproject.toml
+1. version = "0.1.1" in shared-lib/pyproject.toml: increase the version so that next line will work!
 2. in services/api-gateway-service/ run:`poetry update shared-lib`
 """
