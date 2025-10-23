@@ -23,11 +23,10 @@
     build-backend = "poetry.core.masonry.api"
 5. moved shared files there and change the imports in all the files inside shared-lib, e.g.:
 inside the file shared-lib/needs/ResolveNeedsManager.py ->
-
-# from needs.INeedRedisManager import INeedRedisManagerInterface
-# from redis_management.redis_manager import RedisManager
-from .INeedRedisManager import INeedRedisManagerInterface
-from ..redis_management.redis_manager import RedisManager
+`
+from shared_lib.needs.INeedRedisManager import INeedRedisManagerInterface
+from shared_lib.redis_management.redis_manager import RedisManager
+`
 
 6. in services/api-gateway-service/pyproject.toml add:
 `"shared-lib @ file:///D:/Study/Projects/Github/AegisAI/shared-lib"`
@@ -45,6 +44,6 @@ Updating the shared-lib package:
 1. version = "0.1.1" in shared-lib/pyproject.toml: increase the version so that next line will work!
 
 2. in services/api-gateway-service/ run:
-`poetry cache clear . --all` to clear the cache
+`poetry cache clear . --all` to clear the cache (optional?)
 `poetry update shared-lib`
 """
