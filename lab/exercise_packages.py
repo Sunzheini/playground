@@ -47,3 +47,9 @@ Updating the shared-lib package:
 `poetry cache clear . --all` to clear the cache (optional?)
 `poetry update shared-lib`
 """
+
+"""
+If using pip and not poetry:
+pip install "file:///D:/Study/Projects/Github/AegisAI/shared-lib"                       to install
+pip install --force-reinstall "file:///D:/Study/Projects/Github/AegisAI/shared-lib"     to update
+"""
