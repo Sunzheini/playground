@@ -1,6 +1,6 @@
 # kubectl commands
 """
-kubectl create -f .\nginx-pod-definition.yml            # create a pod from the definition file
+kubectl create -f pod-definition.yml                    # create a pod from the definition file
 kubectl get pods                                        # list all pods
 kubectl get pods -o wide                                # list all pods with more details
 kubectl describe pod myapp-pod                          # describe the pod in detail
@@ -13,6 +13,8 @@ curl localhost:8000                                     # Check if nginx serves 
 kubectl run my-nginx --image=nginx:latest --port=80     # create and run a pod with nginx image
 
 kubectl get all                                         # list all resources (pods, services, etc.)
+kubectl get all --all-namespaces                        # list all resources in all namespaces
+kubectl api-resources                                   # list all available API resources
 """
 
 # Replication Controller commands
@@ -44,7 +46,21 @@ kubectl delete deployment myapp-dp                      # delete the deployment
 
 # Namespace commands
 """
+kubectl create namespace my-namespace                   # create a new namespace
+kubectl get namespaces                                  # list all namespaces
+kubectl delete namespace my-namespace                   # delete the namespace
+kubectl get pods -n my-namespace                        # list pods in the specified namespace
+kubectl config set-context --current --namespace=my-namespace     # set the default namespace for current context
+"""
 
+# Service commands
+"""
+kubectl create -f service-definition.yml                # create a service
+kubectl get services                                    # list all services
+kubectl describe service myapp-service                  # describe the service
+kubectl delete service myapp-service                    # delete the service, you must delete the pods separately
+
+curl http://localhost:30008                             # access the service from outside
 """
 
 

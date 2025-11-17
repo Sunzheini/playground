@@ -6,9 +6,23 @@ metadata:                             # Metadata about the pod, this is a dictio
   name: myapp-pod                     # Name of the pod
   labels:                             # Labels to identify the pod
     app: myapp                        # Application label
-    type: fron-end                    # Type label
+    type: front-end                    # Type label
 
 spec:                                 # Specification of the pod
   containers:                         # List of containers in the pod, this is a list
     - name: nginx-container           # Name of the first container, `-` indicates a list item, the items below without a `-` are part of this item!, This item is a dictionary
       image: nginx                    # Docker image for the web application
+
+      # Command to run in the container, you can override the default ENTRYPOINT of the Dockerfile!
+      command: ["/bin/sh", "-c", "echo Hello Kubernetes! && sleep 3600"]
+
+      # Arguments for the command, you can override the default CMD of the Dockerfile!
+      args: []                        # Arguments for the command, empty list
+
+      ports:                          # List of ports to expose from the container
+            - containerPort: 8080     # Port number inside the container
+
+      env:
+        - name: MY_ENV_VAR            # Environment variable name
+          value: "some-value"         # Environment variable value
+
