@@ -6,7 +6,7 @@ metadata:                             # Metadata about the pod, this is a dictio
   name: myapp-pod                     # Name of the pod
   labels:                             # Labels to identify the pod
     app: myapp                        # Application label
-    type: backend                     # Type label
+    type: fron-end                    # Type label
 
 spec:                                 # Specification of the pod
   containers:                         # List of containers in the pod, this is a list

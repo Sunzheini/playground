@@ -12,3 +12,21 @@ curl localhost:8000                                     # Check if nginx serves 
 
 kubectl run my-nginx --image=nginx:latest --port=80     # create and run a pod with nginx image
 """
+
+# Replication Controller commands
+"""
+kubectl create -f rc-definition.yml                     # create a replication controller
+kubectl get rc                                          # list all replication controllers
+kubectl describe rc myapp-rc                            # describe the replication controller
+kubectl scale rc myapp-rc --replicas=5                  # scale the replication controller to 5 replicas
+kubectl delete rc myapp-rc                              # delete the replication controller
+"""
+
+# ReplicaSet commands (newer version of Replication Controller)
+"""
+kubectl create -f rs-definition.yml                     # create a replica set
+kubectl get rs                                          # list all replica sets
+kubectl describe rs myapp-rs                            # describe the replica set
+kubectl scale rs myapp-rs --replicas=4                  # scale the replica set to 4 replicas
+kubectl delete rs myapp-rs                              # delete the replica set
+"""
