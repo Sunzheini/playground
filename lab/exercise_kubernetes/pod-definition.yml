@@ -1,0 +1,16 @@
+apiVersion: v1                        # API version
+
+kind: Pod                             # Define a Pod resource
+
+metadata:                             # Metadata about the pod, this is a dictionary
+  name: myapp-pod                     # Name of the pod
+  labels:                             # Labels to identify the pod
+    app: myapp                        # Application label
+    type: backend                     # Type label
+
+spec:                                 # Specification of the pod
+  containers:                         # List of containers in the pod, this is a list
+    - name: nginx-container           # Name of the first container, `-` indicates a list item, the items below without a `-` are part of this item!, This item is a dictionary
+      image: nginx                    # Docker image for the web application
+      ports:                          # Ports to expose
+        - containerPort: 8000         # Expose port 8000
