@@ -13,7 +13,6 @@ ECS - Elastic Container Service, container orchestration service
 Cognito - User authentication and management service
 DynamoDB - NoSQL database service
 
-
 # Your local tech stack substitute
 Local Service          -> AWS Service
 -------------          -> -----------
