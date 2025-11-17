@@ -12,5 +12,3 @@ spec:                                 # Specification of the pod
   containers:                         # List of containers in the pod, this is a list
     - name: nginx-container           # Name of the first container, `-` indicates a list item, the items below without a `-` are part of this item!, This item is a dictionary
       image: nginx                    # Docker image for the web application
-      ports:                          # Ports to expose
-        - containerPort: 8000         # Expose port 8000
