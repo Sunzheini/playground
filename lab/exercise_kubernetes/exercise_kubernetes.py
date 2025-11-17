@@ -63,6 +63,22 @@ kubectl delete service myapp-service                    # delete the service, yo
 curl http://localhost:30008                             # access the service from outside
 """
 
+# ConfigMap commands
+"""
+kubectl create -f config-map.yml                        # create a ConfigMap
+kubectl get configmaps                                  # list all ConfigMaps
+kubectl describe configmap myapp-config                 # describe the ConfigMap
+kubectl delete configmap myapp-config                   # delete the ConfigMap
+"""
+
+# Secret commands (storing sensitive data encoded in base64)
+"""
+kubectl create -f secret-definition.yml                 # create a Secret
+kubectl get secrets                                     # list all Secrets
+kubectl describe secret myapp-secret                    # describe the Secret
+kubectl delete secret myapp-secret                      # delete the Secret
+"""
+
 
 
 

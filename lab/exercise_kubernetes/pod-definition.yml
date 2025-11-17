@@ -26,3 +26,4 @@ spec:                                 # Specification of the pod
         - name: MY_ENV_VAR            # Environment variable name
           value: "some-value"         # Environment variable value
 
+
