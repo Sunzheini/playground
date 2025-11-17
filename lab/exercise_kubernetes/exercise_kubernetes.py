@@ -11,6 +11,8 @@ kubectl exec -it myapp-pod -- /bin/bash                 # Access pod's terminal
 curl localhost:8000                                     # Check if nginx serves on port 8000
 
 kubectl run my-nginx --image=nginx:latest --port=80     # create and run a pod with nginx image
+
+kubectl get all                                         # list all resources (pods, services, etc.)
 """
 
 # Replication Controller commands
@@ -30,3 +32,35 @@ kubectl describe rs myapp-rs                            # describe the replica s
 kubectl scale rs myapp-rs --replicas=4                  # scale the replica set to 4 replicas
 kubectl delete rs myapp-rs                              # delete the replica set
 """
+
+# Deployment commands (creates ReplicaSets and manages them)
+"""
+kubectl create -f dp-definition.yml                     # create a deployment
+kubectl get deployments                                 # list all deployments
+kubectl describe deployment myapp-dp                    # describe the deployment
+kubectl scale deployment myapp-dp --replicas=6          # scale the deployment to
+kubectl delete deployment myapp-dp                      # delete the deployment
+"""
+
+# Namespace commands
+"""
+
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
