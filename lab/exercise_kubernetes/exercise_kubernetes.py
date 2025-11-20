@@ -79,6 +79,17 @@ kubectl describe secret myapp-secret                    # describe the Secret
 kubectl delete secret myapp-secret                      # delete the Secret
 """
 
+# Other useful commands
+"""
+# Labels and Selectors commands
+kubectl label pods myapp-pod env=production            # add a label to a pod
+kubectl get pods --selector=env=production             # list pods with the specified label
+
+
+
+
+"""
+
 
 
 
