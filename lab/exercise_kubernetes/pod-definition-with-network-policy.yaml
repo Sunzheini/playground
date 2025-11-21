@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: internal-app
+  namespace: default
+  labels:
+      name: internal-app
+spec:
+    containers:
+    - name: internal-app-container
+      image: nginx:latest

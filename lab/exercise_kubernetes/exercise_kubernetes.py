@@ -94,6 +94,20 @@ kubectl describe job myapp-job                          # describe the job
 kubectl delete job myapp-job                            # delete the job
 """
 
+# CronJob commands
+"""
+kubectl create -f cronjob-definition.yml                # create a cron job
+kubectl get cronjobs                                   # list all cron jobs
+kubectl describe cronjob myapp-cronjob                  # describe the cron job
+kubectl delete cronjob myapp-cronjob                    # delete the cron job
+
+# Network Policies commands
+kubectl create -f network-policy.yml                    # create a network policy
+kubectl get networkpolicies                            # list all network policies
+kubectl describe networkpolicy myapp-network-policy     # describe the network policy
+kubectl delete networkpolicy myapp-network-policy       # delete the network policy
+"""
+
 
 
 
