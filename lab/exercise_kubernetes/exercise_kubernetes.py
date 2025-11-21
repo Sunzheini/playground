@@ -84,10 +84,14 @@ kubectl delete secret myapp-secret                      # delete the Secret
 # Labels and Selectors commands
 kubectl label pods myapp-pod env=production            # add a label to a pod
 kubectl get pods --selector=env=production             # list pods with the specified label
+"""
 
-
-
-
+# Job commands
+"""
+kubectl create -f job-definition.yml                    # create a job
+kubectl get jobs                                       # list all jobs
+kubectl describe job myapp-job                          # describe the job
+kubectl delete job myapp-job                            # delete the job
 """
 
 
