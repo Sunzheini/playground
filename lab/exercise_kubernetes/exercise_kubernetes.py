@@ -5,7 +5,10 @@ kubectl get pods                                        # list all pods
 kubectl get pods -o wide                                # list all pods with more details
 kubectl describe pod myapp-pod                          # describe the pod in detail
 kubectl logs myapp-pod                                  # get the logs from the pod
+kubectl edit pod myapp-pod                              # edit the pod definition in your default editor
 kubectl delete pod myapp-pod                            # delete the pod
+
+kubectl run nginx-pod --image=nginx:latest --port=80    # create and run a pod with nginx image
 
 kubectl exec -it myapp-pod -- /bin/bash                 # Access pod's terminal
 curl localhost:8000                                     # Check if nginx serves on port 8000
