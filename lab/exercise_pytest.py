@@ -35,6 +35,33 @@ class Calculator:
 
 
 # ============= FIXTURES =============
+"""
+Automatic execution (autouse=True):
+    - The fixture runs without being explicitly requested in test functions
+    - You don't need to add it as a parameter to test functions
+
+Session scope (scope="session"):
+    - Runs once at the beginning of the test session
+    - Shared across all tests in the session
+    - Fixture is not torn down until all tests complete
+    - When you don't specify a scope, pytest uses scope="function" as the default
+"""
+@pytest.fixture
+def example_fixture():
+    """An example fixture that runs before each test"""
+    print("\nSetting up example fixture before test")
+    yield   # Test runs happen here and after yield is teardown
+    print("\nTearing down example fixture after test")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def example_fixture2():
+    """Session-scoped fixture example"""
+    print("\nSetting up session-scoped fixture before any tests")
+    yield   # All tests run here
+    print("\nTearing down session-scoped fixture after all tests")
+
+
 @pytest.fixture
 def calc():
     """Fixture that provides a fresh Calculator instance for each test"""
