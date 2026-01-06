@@ -1,15 +1,43 @@
 from nicegui import ui
 import time
 import asyncio
-import threading
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import multiprocessing
 import psutil
+import matplotlib
+import os
+# Use non-interactive backend for server environments (no display)
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import io
 import base64
+import sys
 from datetime import datetime
 import numpy as np
+
+# --- Module-level worker functions ---
+# Define these at module level so they are picklable and safe to use with ProcessPoolExecutor.
+def cpu_intensive_worker(n):
+    """CPU-intensive worker: matrix multiplication (demonstrative)."""
+    size = int(n ** 0.5)
+    if size < 10:
+        size = 10
+    a = np.random.rand(size, size)
+    b = np.random.rand(size, size)
+    return np.dot(a, b).sum()
+
+
+def io_intensive_worker(n):
+    """IO-intensive worker: simulated latency-bound work."""
+    time.sleep(0.01 * (n / 10000))
+    return sum([i for i in range(n) if i % 2 == 0])
+
+
+def mixed_worker(n):
+    """Mixed CPU+IO worker."""
+    result = sum([i ** 0.5 for i in range(n // 100)])
+    time.sleep(0.005 * (n / 10000))
+    return result
 
 
 class EnhancedConcurrencyDemo:
@@ -19,6 +47,9 @@ class EnhancedConcurrencyDemo:
         self.execution_history = []
         self.fig, self.ax = plt.subplots(2, 2, figsize=(10, 8))
         plt.subplots_adjust(hspace=0.3, wspace=0.3)
+
+        # Prime psutil so the first cpu_percent() call returns a meaningful value
+        psutil.cpu_percent()
 
     def create_ui(self):
         """Create enhanced UI with visualizations"""
@@ -50,8 +81,14 @@ class EnhancedConcurrencyDemo:
             with ui.tab_panel('System Monitor'):
                 self.create_monitor_tab()
 
-        # Start monitoring
-        self.update_monitor()
+        # Schedule the async monitor loop as a background task so it runs without blocking
+        # Use create_task to ensure it's scheduled on the running event loop.
+        try:
+            asyncio.get_running_loop().create_task(self.update_monitor())
+        except RuntimeError:
+            # If there's no running loop yet (calling create_ui before ui.run), schedule when loop starts
+            from functools import partial
+            asyncio.get_event_loop().call_soon(partial(asyncio.create_task, self.update_monitor()))
 
     def create_demo_tab(self):
         """Create the main demonstration tab"""
@@ -69,19 +106,20 @@ class EnhancedConcurrencyDemo:
                         label='Task Type'
                     ).props('outlined').classes('w-full')
 
+                    # Iterations slider and a label to show its value
                     self.iterations = ui.slider(
                         min=1000, max=5000000, value=100000,
-                        label=f'Iterations: {100000:,}'
-                    ).on('update:model-value',
-                         lambda e: self.iterations_label.set_text(f'Iterations: {int(e.args):,}'))
-                    self.iterations_label = ui.label(f'Iterations: {100000:,}')
+                    ).classes('w-full')
+                    # Keep a label to display the numeric value (updated via onchange)
+                    self.iterations_label = ui.label(f'Iterations: {100_000:,}')
+                    # Update iterations label when slider value changes
+                    self.iterations.on('update:model-value', lambda e: self.iterations_label.set_text(f'Iterations: {int(e.args) if hasattr(e, "args") else int(e)}'))
 
                     self.num_tasks = ui.slider(
                         min=1, max=16, value=4,
-                        label=f'Parallel Tasks: 4'
-                    ).on('update:model-value',
-                         lambda e: self.tasks_label.set_text(f'Parallel Tasks: {int(e.args)}'))
+                    ).classes('w-full')
                     self.tasks_label = ui.label('Parallel Tasks: 4')
+                    self.num_tasks.on('update:model-value', lambda e: self.tasks_label.set_text(f'Parallel Tasks: {int(e.args) if hasattr(e, "args") else int(e)}'))
 
                 # Execution Buttons
                 with ui.card().classes('w-full'):
@@ -118,6 +156,7 @@ class EnhancedConcurrencyDemo:
                     for method in methods:
                         with ui.row().classes('items-center w-full'):
                             ui.label(method).classes('w-32')
+                            # We keep progress updates coarse-grained to avoid thread-safety issues
                             self.progress_bars[method] = ui.linear_progress(0, show_value=False).classes('flex-1')
 
     def create_explanation_tab(self):
@@ -177,12 +216,13 @@ class EnhancedConcurrencyDemo:
             # CPU Usage
             with ui.card().classes('w-full'):
                 ui.label('CPU Usage').classes('text-h6')
-                self.cpu_chart = ui.line_plot([], [], limit=20).classes('h-48')
+                # Create line_plot without passing positional data; use keyword arg for limit
+                self.cpu_chart = ui.line_plot(limit=20).classes('h-48')
 
             # Memory Usage
             with ui.card().classes('w-full'):
                 ui.label('Memory Usage').classes('text-h6')
-                self.memory_chart = ui.line_plot([], [], limit=20).classes('h-48')
+                self.memory_chart = ui.line_plot(limit=20).classes('h-48')
 
             # System Info
             with ui.row().classes('w-full space-x-4'):
@@ -192,32 +232,21 @@ class EnhancedConcurrencyDemo:
                     self.memory_total_label = ui.label('')
                     self.python_version_label = ui.label('')
 
+    # Keep instance methods for local/threaded execution, but multiprocessing will use module-level workers
     def cpu_intensive_task(self, n):
         """CPU-intensive task: matrix multiplication"""
-        size = int(n ** 0.5)
-        if size < 10:
-            size = 10
-        a = np.random.rand(size, size)
-        b = np.random.rand(size, size)
-        return np.dot(a, b).sum()
+        return cpu_intensive_worker(n)
 
     def io_intensive_task(self, n):
         """IO-intensive task: simulated network/disk IO"""
-        time.sleep(0.01 * (n / 10000))
-        return sum([i for i in range(n) if i % 2 == 0])
+        return io_intensive_worker(n)
 
     def mixed_task(self, n):
         """Mixed CPU and IO task"""
-        # CPU part
-        result = sum([i ** 0.5 for i in range(n // 100)])
-
-        # IO part
-        time.sleep(0.005 * (n / 10000))
-
-        return result
+        return mixed_worker(n)
 
     async def run_sequential(self):
-        """Run tasks sequentially"""
+        """Run tasks sequentially (offloaded to a thread to keep UI responsive)."""
         await self._run_with_method('Sequential')
 
     async def run_threading(self):
@@ -233,70 +262,113 @@ class EnhancedConcurrencyDemo:
         await self._run_with_method('Asyncio')
 
     async def _run_with_method(self, method):
-        """Common execution logic for all methods"""
-        task_func = self.get_task_function()
+        """Common execution logic for all methods.
+
+        Important: Heavy/blocking operations are executed inside asyncio.to_thread to avoid
+        blocking the main event loop / UI thread. We keep progress updates coarse-grained
+        because updating UI from background threads is not safe.
+        """
+        # Pick a picklable function for multiprocessing; module-level workers are used.
+        task_type = self.task_type.value
+        if task_type == 'CPU Intensive':
+            task_func = cpu_intensive_worker
+        elif task_type == 'IO Intensive':
+            task_func = io_intensive_worker
+        else:
+            task_func = mixed_worker
+
         n = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        # Update progress bar
-        self.progress_bars[method].value = 0.5
-
+        # Set coarse progress indicator
+        self.progress_bars[method].value = 0.1
         start = time.time()
 
+        # Define sync functions to run inside threads so we don't block the event loop
         if method == 'Sequential':
-            results = []
-            for i in range(num_tasks):
-                results.append(task_func(n))
-                self.progress_bars[method].value = (i + 1) / num_tasks
+            def sync_run():
+                results = []
+                for _ in range(num_tasks):
+                    try:
+                        results.append(task_func(n))
+                    except Exception as e:
+                        results.append(e)
+                return results
+
+            results = await asyncio.to_thread(sync_run)
 
         elif method == 'Threading':
-            with ThreadPoolExecutor(max_workers=num_tasks) as executor:
-                futures = [executor.submit(task_func, n) for _ in range(num_tasks)]
-                for i, future in enumerate(futures):
-                    future.result()
-                    self.progress_bars[method].value = (i + 1) / num_tasks
-                results = [future.result() for future in futures]
+            def sync_run():
+                results = []
+                with ThreadPoolExecutor(max_workers=num_tasks) as executor:
+                    futures = [executor.submit(task_func, n) for _ in range(num_tasks)]
+                    for f in futures:
+                        try:
+                            results.append(f.result())
+                        except Exception as e:
+                            results.append(e)
+                return results
+
+            results = await asyncio.to_thread(sync_run)
 
         elif method == 'Multiprocessing':
-            with ProcessPoolExecutor(max_workers=min(num_tasks, multiprocessing.cpu_count())) as executor:
-                futures = [executor.submit(task_func, n) for _ in range(num_tasks)]
-                for i, future in enumerate(futures):
-                    future.result()
-                    self.progress_bars[method].value = (i + 1) / num_tasks
-                results = [future.result() for future in futures]
+            def sync_run():
+                results = []
+                ctx = multiprocessing.get_context('spawn')
+                with ProcessPoolExecutor(max_workers=min(num_tasks, multiprocessing.cpu_count()), mp_context=ctx) as executor:
+                    futures = [executor.submit(task_func, n) for _ in range(num_tasks)]
+                    for f in futures:
+                        try:
+                            results.append(f.result())
+                        except Exception as e:
+                            results.append(e)
+                return results
+
+            results = await asyncio.to_thread(sync_run)
 
         else:  # Asyncio
             async def async_task():
                 return await asyncio.to_thread(task_func, n)
 
-            tasks = [async_task() for _ in range(num_tasks)]
-            for i, task in enumerate(asyncio.as_completed(tasks)):
-                await task
-                self.progress_bars[method].value = (i + 1) / num_tasks
+            # Create real asyncio.Task objects so we can await them individually
+            tasks = [asyncio.create_task(async_task()) for _ in range(num_tasks)]
 
-            results = await asyncio.gather(*tasks)
+            # As tasks complete we update a coarse progress indicator and collect results.
+            results = []
+            completed = 0
+            for fut in asyncio.as_completed(tasks):
+                try:
+                    r = await fut
+                except Exception as e:
+                    r = e
+                results.append(r)
+                completed += 1
+                # Update UI progress from the main loop
+                self.progress_bars[method].value = completed / num_tasks
+
+            # All tasks are awaited via as_completed; no need to call gather()
 
         duration = time.time() - start
 
         # Display results
         self.show_results(method, duration, results, num_tasks)
 
-        # Reset progress bar
-        await asyncio.sleep(0.5)
+        # Reset progress bar after a short pause so user sees completion
+        await asyncio.sleep(0.3)
         self.progress_bars[method].value = 0
 
         # Update chart
         self.update_performance_chart(method, duration, num_tasks)
 
     def get_task_function(self):
-        """Get the appropriate task function"""
+        """Get the appropriate task function (kept for backward compatibility)."""
         task_type = self.task_type.value
         if task_type == 'CPU Intensive':
-            return self.cpu_intensive_task
+            return cpu_intensive_worker
         elif task_type == 'IO Intensive':
-            return self.io_intensive_task
+            return io_intensive_worker
         else:
-            return self.mixed_task
+            return mixed_worker
 
     def show_results(self, method, duration, results, num_tasks):
         """Display execution results"""
@@ -306,7 +378,8 @@ class EnhancedConcurrencyDemo:
             ui.separator()
             ui.label(f'⏱️ Total Time: {duration:.3f} seconds')
             ui.label(f'📊 Tasks Completed: {num_tasks}')
-            ui.label(f'📈 Average per task: {duration / num_tasks:.3f}s')
+            avg = duration / num_tasks if num_tasks else 0.0
+            ui.label(f'📈 Average per task: {avg:.3f}s')
             ui.label(f'⚡ Speedup vs Sequential: Calculate by running both')
 
             # Color code based on performance
@@ -366,7 +439,10 @@ class EnhancedConcurrencyDemo:
         bars = self.ax[0, 0].bar(methods, avg_durations, color=colors)
         self.ax[0, 0].set_title('Average Execution Time')
         self.ax[0, 0].set_ylabel('Time (seconds)')
-        self.ax[0, 0].bar_label(bars, fmt='%.2f')
+        try:
+            self.ax[0, 0].bar_label(bars, fmt='%.2f')
+        except Exception:
+            pass
 
         # Plot 2: Speed comparison
         if avg_durations[0] > 0:
@@ -381,7 +457,7 @@ class EnhancedConcurrencyDemo:
             if self.performance_data[method]:
                 total_tasks = sum(d['tasks'] for d in self.performance_data[method])
                 total_time = sum(d['duration'] for d in self.performance_data[method])
-                throughput.append(total_tasks / max(total_time, 0.01))
+                throughput.append(float(total_tasks) / max(total_time, 0.01))
             else:
                 throughput.append(0)
 
@@ -391,8 +467,17 @@ class EnhancedConcurrencyDemo:
 
         # Plot 4: Method usage
         usage_counts = [len(self.performance_data[m]) for m in methods]
-        self.ax[1, 1].pie(usage_counts, labels=methods, colors=colors, autopct='%1.1f%%')
-        self.ax[1, 1].set_title('Method Usage Distribution')
+        total_usage = sum(usage_counts)
+        if total_usage > 0:
+            # Only draw pie chart when there is data; otherwise matplotlib computes NaNs and fails
+            self.ax[1, 1].pie(usage_counts, labels=methods, colors=colors, autopct='%1.1f%%')
+            self.ax[1, 1].set_title('Method Usage Distribution')
+        else:
+            # No usage data yet — draw a placeholder message instead of a pie chart
+            self.ax[1, 1].text(0.5, 0.5, 'No data', horizontalalignment='center',
+                               verticalalignment='center', transform=self.ax[1, 1].transAxes,
+                               fontsize=12, color='gray')
+            self.ax[1, 1].set_title('Method Usage Distribution')
 
         # Convert to image
         buf = io.BytesIO()
@@ -431,8 +516,13 @@ class EnhancedConcurrencyDemo:
                 memory_history.pop(0)
 
             # Update charts
-            self.cpu_chart.push([count], [cpu])
-            self.memory_chart.push([count], [memory])
+            try:
+                # NiceGUI line_plot.push accepts lists of x and y values
+                self.cpu_chart.push([count], [cpu])
+                self.memory_chart.push([count], [memory])
+            except Exception:
+                # If push isn't supported, skip updating plots gracefully
+                pass
 
             count += 1
             await asyncio.sleep(1)
@@ -449,10 +539,10 @@ class EnhancedConcurrencyDemo:
         dialog.open()
 
 
-import sys
+# Create and run the app under the usual guard so ProcessPoolExecutor spawn is safe on Windows
+if __name__ == '__main__':
+    app = EnhancedConcurrencyDemo()
+    app.create_ui()
 
-# Create and run the app
-app = EnhancedConcurrencyDemo()
-app.create_ui()
-
-ui.run(title='Advanced Concurrency Demo', port=8080, reload=False)
+    port = int(os.environ.get('PORT', '8080'))
+    ui.run(title='Advanced Concurrency Demo', port=port, reload=False)
