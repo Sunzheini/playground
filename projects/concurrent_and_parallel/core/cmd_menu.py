@@ -1,3 +1,6 @@
+"""
+A simple command-line menu system that maps user commands to functions.
+"""
 class CommandMenu:
     """
     A simple command-line menu system that maps user commands to functions.

@@ -1,3 +1,6 @@
+"""
+The entry point for this app with various concurrency and parallelism examples.
+"""
 import time
 import asyncio
 from multiprocessing import Queue, Process

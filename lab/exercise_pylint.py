@@ -23,6 +23,8 @@ pylint my_package/
 # Analyze entire project
 pylint . (inside project root) # but this will include venv and other folders
 pylint --ignore-paths=".*venv.*|.*\.idea.*|.*migrations.*|.*test.*|.*__pycache__.*" .          # ignore common folders
+
+pylint --persistent=no .    # disable caching of results
 """"" 
 import os,sys
 myVar=10
