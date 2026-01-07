@@ -23,7 +23,7 @@ def counter(num, q=None):
         count += 1
 
     if q:
-        q.put(count)    # put the result in the queue
+        q.put(count)    # put method is used to add an item to a queue
 
 
 def several_processes():
