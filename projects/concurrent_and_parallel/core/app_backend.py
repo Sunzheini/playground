@@ -66,7 +66,8 @@ class AppBackend:
         num_cores = multiprocessing.cpu_count()
         return f"Number of CPU cores: {num_cores}"
 
-    def parallel_processes(self, number_of_processes: int, number_to_count: int, queue=False) -> float:
+    @staticmethod
+    def parallel_processes(number_of_processes: int, number_to_count: int, queue=False) -> tuple[float, list]:
         """
         Run parallel processes.
         :param number_of_processes: The number of processes to run.
@@ -79,22 +80,32 @@ class AppBackend:
 
         start = time.perf_counter()
 
-        for _ in range(number_of_processes):
-            if queue:
-                p = multiprocessing.Process(target=counter, args=(number_to_count, queue))
-            else:
-                p = multiprocessing.Process(target=counter, args=(number_to_count,))
+        # 1. Start processes -----------------------------------------------------------
+        for process_number in range(number_of_processes):
+            p = multiprocessing.Process(target=counter, args=(number_to_count, queue, process_number))
 
             p.start()   # 1. start the process
             processes.append(p)
+        # ------------------------------------------------------------------------------
 
+        # 2. Wait for processes to finish ----------------------------------------------
         for p in processes:
-            p.join()    # 2. wait for the process to finish
+            p.join()
+        # ------------------------------------------------------------------------------
+
+        # 3. Collect results from queue (consumer) -------------------------------------
+        results = []
+        if queue is not None:
+            while not queue.empty():
+                results.append(queue.get())
+
+            print(f"Results from processes: {results}")
+        # ------------------------------------------------------------------------------
 
         end = time.perf_counter()
         elapsed_time_in_seconds = end - start
 
-        return elapsed_time_in_seconds
+        return elapsed_time_in_seconds, results
     #endregion
 
     #region Multithreading

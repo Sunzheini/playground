@@ -17,17 +17,17 @@ class NiceGuiUI:
         # Multiprocessing section
         # --------------------------------------------------------------------------------------
         with self.ui.row().classes('items-center justify-center mt-4 mb-8'):
-            with self.ui.row().classes('items-center justify-center mt-4 mb-8'):
-                self._create_label(self.backend.multithreading_info_text)
+            with self.ui.row().classes('items-center justify-center mt-8 border-2 border-gray-300'):
+                # self._create_label(self.backend.multithreading_info_text)
                 self._create_label(self.backend.number_of_cores_text)
 
-            with self.ui.row().classes('items-center justify-center mt-4 mb-8'):
-                self.input_number_processes = self.ui.input(label='Number of processes', value='4').classes('w-48')
-                self.input_number_count = self.ui.input(label='Number to count to', value='50000000').classes('w-48')
+            with self.ui.row().classes('items-center justify-center mt-8 border-2 border-gray-300'):
+                self.input_number_processes = self.ui.input(label='Number of processes', value='2').classes('w-48')
+                self.input_number_count = self.ui.input(label='Number to count to', value='50000').classes('w-48')
                 self.test_button = self.ui.button('Run Multiprocessing Test', on_click=self.run_parallel_processes)
                 self.multiprocessing_result = self.ui.label('Click the button to run test')
 
-            with self.ui.row().classes('items-center justify-center mt-4 mb-8'):
+            with self.ui.row().classes('items-center justify-center mt-8 border-2 border-gray-300'):
                 self._create_label(self.backend.multithreading_queue_text)
                 self.test_button = self.ui.button('Run Multiprocessing Test', on_click=self.run_parallel_processes_with_queue)
                 self.multiprocessing_queue_result = self.ui.label('Click the button to run test with queue')
@@ -53,7 +53,8 @@ class NiceGuiUI:
         """
         num_processes = int(self.input_number_processes.value)
         num_to_count = int(self.input_number_count.value)
-        elapsed_time = self.backend.parallel_processes(num_processes, num_to_count)
+
+        elapsed_time, _ = self.backend.parallel_processes(num_processes, num_to_count)
         self.multiprocessing_result.set_text(f'Finished in {elapsed_time:.2f} seconds using {num_processes} processes counting to {num_to_count}.')
 
     def run_parallel_processes_with_queue(self):
@@ -62,8 +63,10 @@ class NiceGuiUI:
         """
         num_processes = int(self.input_number_processes.value)
         num_to_count = int(self.input_number_count.value)
-        elapsed_time = self.backend.parallel_processes(num_processes, num_to_count, queue=True)
-        self.multiprocessing_queue_result.set_text(f'Finished in {elapsed_time:.2f} seconds using {num_processes} processes counting to {num_to_count} with a queue.')
+
+        elapsed_time, results = self.backend.parallel_processes(num_processes, num_to_count, queue=True)
+        self.multiprocessing_queue_result.set_text(f'Finished in {elapsed_time:.2f} seconds using {num_processes} processes counting to {num_to_count} with a queue. '
+                                                   f'Results collected from queue: {results}')
 
     #region properties
     @property

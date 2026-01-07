@@ -1,17 +1,22 @@
 """
 A module containing helper functions for concurrency and parallelism projects.
 """
-def counter(number: int, q=None) -> None:
+def counter(n: int, queue = None, process_id = None):
     """
-    A simple counting function that counts up to a specified number.
-    Optionally puts the result into a queue for inter-process communication.
-    :param number: The number to count up to.
-    :param q: An optional Queue to put the result into.
-    :return: None
+    Counter function that puts result in queue
+    :param n: The number to count up to.
+    :param queue: The multiprocessing queue to put results into.
+    :param process_id: The ID of the process.
     """
     count = 0
-    for _ in range(number):
+    for i in range(n):
         count += 1
 
-    if q is not None:
-        q.put(count)  # put the result into the queue
+    if queue:
+        queue.put({
+            'process_id': process_id,
+            'count': count,
+            'completed': True
+        })
+
+    return count
