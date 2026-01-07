@@ -174,57 +174,21 @@
 #         }
 #     )
 #     menu.run()  # then run the function by their name
+
+
 import os
-import subprocess
-import sys
-import webbrowser
-import time
+
+from projects.concurrent_and_parallel.core.app_backend import AppBackend
+from projects.concurrent_and_parallel.frontend.nicegui_ui import NiceGuiUI
 
 
 def main():
     """Main entry point"""
-    print("=" * 50)
-    print("Python Concurrency Demo Application")
-    print("=" * 50)
-    print("\nChoose which version to run:")
-    print("1. Basic Demo (Simple interface)")
-    print("2. Enhanced Demo (With charts and visualizations)")
-    print("3. Both (Basic on port 8080, Enhanced on 8081)")
+    backend = AppBackend().current_backend
+    frontend = NiceGuiUI(backend).current_ui
 
-    choice = input("\nEnter your choice (1-3): ").strip()
-
-    if choice == '1':
-        print("\n🚀 Starting Basic Demo on http://localhost:8080")
-        webbrowser.open('http://localhost:8080')
-        subprocess.run([sys.executable, 'core/app.py'])
-
-    elif choice == '2':
-        print("\n🚀 Starting Enhanced Demo on http://localhost:8080")
-        webbrowser.open('http://localhost:8080')
-        subprocess.run([sys.executable, 'core/app_enhanced.py'])
-
-    elif choice == '3':
-        print("\n🚀 Starting both applications:")
-        print("Basic Demo: http://localhost:8080")
-        print("Enhanced Demo: http://localhost:8081")
-
-        # Start basic demo
-        import threading
-        def run_basic():
-            subprocess.run([sys.executable, 'core/app.py'])
-
-        def run_enhanced():
-            subprocess.run([sys.executable, 'core/app_enhanced.py'], env={**os.environ, 'PORT': '8081'})
-
-        threading.Thread(target=run_basic).start()
-        time.sleep(2)
-        threading.Thread(target=run_enhanced).start()
-
-        webbrowser.open('http://localhost:8080')
-        webbrowser.open('http://localhost:8081')
-
-    else:
-        print("Invalid choice. Exiting.")
+    port = int(os.environ.get('PORT', '8080'))
+    frontend.run(title='Python Concurrency Demo', port=port, reload=False)
 
 
 if __name__ == '__main__':
