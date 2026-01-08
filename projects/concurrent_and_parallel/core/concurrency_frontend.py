@@ -134,7 +134,7 @@ class ConcurrencyFrontend:
                 with ui.row().classes('w-full space-x-2'):
                     ui.button('Sequential', on_click=self.run_sequential,
                               color='secondary').classes('flex-1')
-                    ui.button('Threading', on_click=self.run_threading,
+                    ui.button('Threading', on_click=self.run_multithreading,
                               color='secondary').classes('flex-1')
                     ui.button('Multiprocessing', on_click=self.run_multiprocessing,
                               color='secondary').classes('flex-1')
@@ -166,23 +166,9 @@ class ConcurrencyFrontend:
                         rows=[]
                     ).classes('w-full')
             #endregion
-
-        # Schedule the metrics loop as a background task so it doesn't block UI creation
-        # If there's already a running event loop (e.g. when NiceGUI is active), schedule the task immediately.
-        # If not (e.g. create_ui called before ui.run), schedule creation of the task once the loop starts.
-        try:
-            asyncio.get_running_loop().create_task(self.update_system_metrics())
-        except RuntimeError:
-            # No running loop yet — arrange to create the task when the loop starts.
-            try:
-                # Prefer call_soon with a lambda that calls asyncio.create_task
-                asyncio.get_event_loop().call_soon(lambda: asyncio.create_task(self.update_system_metrics()))
-            except Exception:
-                # Last-resort fallback: ignore — NiceGUI will create the loop and the metrics won't run
-                pass
     #endregion
     
-    #region Info methods
+    #region General methods
     def _show_info(self) -> None:
         """Show information dialog describing the demo."""
         with ui.dialog() as dialog, ui.card():
@@ -194,11 +180,9 @@ class ConcurrencyFrontend:
         """Show a dialog with the number of CPU cores."""
         text = f'({self.backend.number_of_cores_text} CPU cores detected)'
         return text
-    #endregion
 
-    #region Concurrency Methods
     def get_task_function(self):
-        """Return a module-level function (picklable) for the selected task type."""
+        """Return a module-level function (pickle-able) for the selected task type."""
         task_type = self.task_type.value
         if task_type == 'CPU Intensive':
             return cpu_intensive_task
@@ -207,13 +191,13 @@ class ConcurrencyFrontend:
         else:
             return mixed_task
 
-    def start_execution(self, method):
+    def start_execution(self, method) -> None:
         """Prepare for execution: reset results and mark start time."""
         self.results = []
         self.start_time = time.time()
         ui.notify(f'Starting {method} execution...')
 
-    def show_results(self, method, duration, results):
+    def show_results(self, method, duration, results) -> None:
         """Display execution results with a defensive guard for empty results."""
         avg = duration / len(results) if results else 0.0  # avoid division by zero
         self.results_label.set_text(
@@ -222,10 +206,7 @@ class ConcurrencyFrontend:
             f'Average time per task: {avg:.3f}s'
         )
 
-        # Update metrics (placeholder)
-        self.update_performance_chart(method, duration)
-
-    def add_to_history(self, method, duration, num_tasks):
+    def add_to_history(self, method, duration, num_tasks) -> None:
         """Add execution to history table and cap size to MAX_EXECUTION_HISTORY_RECORDS."""
         history = self.history_table.rows
         history.append({
@@ -239,25 +220,15 @@ class ConcurrencyFrontend:
             del history[0: len(history) - self.MAX_EXECUTION_HISTORY_RECORDS]
         self.history_table.update()
 
-    def update_performance_chart(self, method, duration):
-        """Placeholder for updating a chart; left intentionally minimal."""
-        # In a real app, you'd render a chart and embed it in the UI container
-        pass
+    def clear_results(self) -> None:
+        """Clear UI results and history."""
+        self.results_label.set_text('Results will appear here')
+        self.history_table.rows.clear()
+        self.history_table.update()
+        ui.notify('Results cleared')
+    #endregion
 
-    async def update_system_metrics(self):
-        """Periodically update CPU/memory/thread labels without blocking the event loop."""
-        while True:
-            cpu = psutil.cpu_percent()
-            memory = psutil.virtual_memory().percent
-            threads = threading.active_count()
-
-            # Update UI labels from the event loop (safe after await)
-            self.cpu_label.set_text(f'CPU: {cpu:.1f}%')
-            self.memory_label.set_text(f'Memory: {memory:.1f}%')
-            self.thread_count_label.set_text(f'Threads: {threads}')
-
-            await asyncio.sleep(1)
-
+    #region Concurrency Methods
     async def run_sequential(self):
         """Run tasks sequentially but offload the actual computation to a thread.
 
@@ -266,105 +237,49 @@ class ConcurrencyFrontend:
         """
         self.start_execution('Sequential')
         task_func = self.get_task_function()
-        n = int(self.iterations.value)
+        num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        # Execute the blocking loop in a background thread
-        def sync_run():
-            results = []
-            for _ in range(num_tasks):
-                try:
-                    results.append(task_func(n))
-                except Exception as e:
-                    results.append(e)
-            return results
+        results, history = await self.backend.run_sequential(task_func, num_iterations, num_tasks)
 
-        start = time.time()
-        results = await asyncio.to_thread(sync_run)
-        duration = time.time() - start
-
-        self.show_results('Sequential', duration, results)
-        self.add_to_history('Sequential', duration, num_tasks)
-
-    async def run_threading(self):
-        """Run tasks using ThreadPoolExecutor without blocking the event loop."""
-        self.start_execution('Threading')
-        task_func = self.get_task_function()
-        n = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
-
-        # Wrap the synchronous ThreadPool work in a function and run it in a thread
-        def sync_run():
-            results = []
-            with ThreadPoolExecutor(max_workers=num_tasks) as executor:
-                futures = [executor.submit(task_func, n) for _ in range(num_tasks)]
-                for f in futures:
-                    try:
-                        results.append(f.result())
-                    except Exception as e:
-                        results.append(e)
-            return results
-
-        start = time.time()
-        results = await asyncio.to_thread(sync_run)
-        duration = time.time() - start
-
-        self.show_results('Threading', duration, results)
-        self.add_to_history('Threading', duration, num_tasks)
+        self.show_results(*results)
+        self.add_to_history(*history)
 
     async def run_multiprocessing(self):
         """Run tasks using ProcessPoolExecutor safely on Windows and without blocking the event loop.
-
         Uses module-level functions (picklable) and spawn context to avoid Windows issues.
         """
         self.start_execution('Multiprocessing')
         task_func = self.get_task_function()
-        n = int(self.iterations.value)
+        num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        def sync_run():
-            results = []
-            # Use 'spawn' context for safety on Windows
-            ctx = multiprocessing.get_context('spawn')
-            with ProcessPoolExecutor(max_workers=num_tasks, mp_context=ctx) as executor:
-                futures = [executor.submit(task_func, n) for _ in range(num_tasks)]
-                for f in futures:
-                    try:
-                        results.append(f.result())
-                    except Exception as e:
-                        results.append(e)
-            return results
+        results, history = await self.backend.run_multiprocessing(task_func, num_iterations, num_tasks)
 
-        start = time.time()
-        results = await asyncio.to_thread(sync_run)
-        duration = time.time() - start
+        self.show_results(*results)
+        self.add_to_history(*history)
 
-        self.show_results('Multiprocessing', duration, results)
-        self.add_to_history('Multiprocessing', duration, num_tasks)
+    async def run_multithreading(self):
+        """Run tasks using ThreadPoolExecutor without blocking the event loop."""
+        self.start_execution('Threading')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.run_multithreading(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
 
     async def run_asyncio(self):
         """Run tasks using asyncio by offloading blocking calls to threads with asyncio.to_thread."""
         self.start_execution('Asyncio')
         task_func = self.get_task_function()
-        n = int(self.iterations.value)
+        num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        # Build coroutines that call the sync function in a thread
-        async def async_task():
-            return await asyncio.to_thread(task_func, n)
+        results, history = await self.backend.run_asyncio(task_func, num_iterations, num_tasks)
 
-        start = time.time()
-        tasks = [async_task() for _ in range(num_tasks)]
-        results = await asyncio.gather(*tasks)
-        duration = time.time() - start
-
-        self.show_results('Asyncio', duration, results)
-        self.add_to_history('Asyncio', duration, num_tasks)
-
-    def clear_results(self):
-        """Clear UI results and history."""
-        self.results_label.set_text('Results will appear here')
-        self.history_table.rows.clear()
-        self.history_table.update()
-        ui.notify('Results cleared')
+        self.show_results(*results)
+        self.add_to_history(*history)
     #endregion

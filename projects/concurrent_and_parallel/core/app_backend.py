@@ -1,8 +1,10 @@
 """
 Module: app_backend
 """
+import asyncio
 import multiprocessing
 import time
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 from projects.concurrent_and_parallel.helpers.helper_functions import counter
 
@@ -11,6 +13,7 @@ class AppBackend:
     """
     Backend logic for the concurrency and parallelism application.
     """
+    #region Properties
     @property
     def info_text(self) -> str:
         """
@@ -56,8 +59,45 @@ class AppBackend:
         """
         num_cores = multiprocessing.cpu_count()
         return f"{num_cores}"
+    #endregion
 
+    #region Methods
+    async def run_sequential(self, task_function, number_of_iterations: int, number_of_tasks: int):
+        # Execute the blocking loop in a background thread
+        def sync_run():
+            results = []
+            for _ in range(number_of_tasks):
+                try:
+                    results.append(task_function(number_of_iterations))
+                except Exception as e:
+                    results.append(e)
+            return results
 
+        start = time.time()
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        return ('Sequential', duration, results), ('Sequential', duration, number_of_tasks)
+
+    async def run_multiprocessing(self, task_function, number_of_iterations: int, number_of_tasks: int):
+        def sync_run():
+            results = []
+            # Use 'spawn' context for safety on Windows
+            ctx = multiprocessing.get_context('spawn')
+            with ProcessPoolExecutor(max_workers=number_of_tasks, mp_context=ctx) as executor:
+                futures = [executor.submit(task_function, number_of_iterations) for _ in range(number_of_tasks)]
+                for f in futures:
+                    try:
+                        results.append(f.result())
+                    except Exception as e:
+                        results.append(e)
+            return results
+
+        start = time.time()
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_tasks)
 
     @staticmethod
     def parallel_processes(number_of_processes: int, number_to_count: int, queue=False) -> tuple[float, list]:
@@ -99,3 +139,35 @@ class AppBackend:
         elapsed_time_in_seconds = end - start
 
         return elapsed_time_in_seconds, results
+
+    async def run_multithreading(self, task_function, number_of_iterations: int, number_of_tasks: int):
+        # Wrap the synchronous ThreadPool work in a function and run it in a thread
+        def sync_run():
+            results = []
+            with ThreadPoolExecutor(max_workers=number_of_tasks) as executor:
+                futures = [executor.submit(task_function, number_of_iterations) for _ in range(number_of_tasks)]
+                for f in futures:
+                    try:
+                        results.append(f.result())
+                    except Exception as e:
+                        results.append(e)
+            return results
+
+        start = time.time()
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        return ('Threading', duration, results), ('Threading', duration, number_of_tasks)
+
+    async def run_asyncio(self, task_function, number_of_iterations: int, number_of_tasks: int):
+        # Build coroutines that call the sync function in a thread
+        async def async_task():
+            return await asyncio.to_thread(task_function, number_of_iterations)
+
+        start = time.time()
+        tasks = [async_task() for _ in range(number_of_tasks)]
+        results = await asyncio.gather(*tasks)
+        duration = time.time() - start
+
+        return ('Asyncio', duration, results), ('Asyncio', duration, number_of_tasks)
+    #endregion
