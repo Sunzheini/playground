@@ -11,50 +11,41 @@ class AppBackend:
     """
     Backend logic for the concurrency and parallelism application.
     """
-    def __init__(self):
-        pass
-
     @property
-    def current_backend(self):
-        return self
-
-    #region Multiprocessing
-    @property
-    def multithreading_info_text(self) -> str:
+    def info_text(self) -> str:
         """
         Get the multithreading information text.
         :return: A string representing multithreading info.
         """
-        text = """
-        ✅ Best for:
-            CPU-bound tasks (compute-heavy)
-            
-            Tasks that require true parallel execution without GIL interference 
-            (GUI frameworks run in a single main thread, and blocking operations freeze the event loop.)
-            (Tkinter does not natively support async/await)!
-            
-            Independent processes, often large-scale computation
-        
-        ⏳ Behavior:
-            Runs in separate processes, separate memory
-            Each process has its own Python interpreter, so GIL is not a bottleneck
-            More memory and setup overhead than threads or asyncio
-        """
-        return text
+        text = '''
+        ### Python Concurrency Demo
 
-    @property
-    def multithreading_queue_text(self) -> str:
-        """
-        Get the multithreading queue information text.
-        :return: A string representing multithreading queue info.
-        """
-        text = """
-        Benefits of adding a queue:
-        1. Inter-Process Communication (IPC): Processes can't share memory directly. A queue allows them to communicate and exchange data.
-        2. Collect Results: Without a queue, you can't get results back from processes. With a queue, each process can put its result in the queue.
-        3. Progress Monitoring: Processes can send progress updates back to the main process.
-        4. Load Balancing: You can use a queue as a task queue for worker processes.
-        """
+        This application demonstrates different concurrency approaches in Python:
+
+        1. **Sequential**: Runs tasks one after another
+
+
+        2. **Multiprocessing**: Uses multiple processes (good for CPU-bound tasks)
+        Tasks that require true parallel execution without GIL interference 
+        (GUI frameworks run in a single main thread, and blocking operations freeze the event loop.)
+        (Tkinter does not natively support async/await)!
+
+        Runs in separate processes, separate memory.
+        Each process has its own Python interpreter, so GIL is not a bottleneck.
+        More memory and setup overhead than threads or asyncio.
+
+        3. **Threading**: Uses multiple threads (good for I/O-bound tasks)
+
+
+        4. **Asyncio**: Uses async/await for concurrent I/O operations
+
+        **Task Types:**
+        - CPU Intensive: e.g. Calculations, Data processing
+        - IO Intensive: e.g. File operations, Network requests
+        - Mixed: Combination of both
+
+        Adjust the sliders to see how different parameters affect performance!
+        '''
         return text
 
     @property
@@ -64,7 +55,9 @@ class AppBackend:
         :return: A string representing the number of CPU cores.
         """
         num_cores = multiprocessing.cpu_count()
-        return f"Number of CPU cores: {num_cores}"
+        return f"{num_cores}"
+
+
 
     @staticmethod
     def parallel_processes(number_of_processes: int, number_to_count: int, queue=False) -> tuple[float, list]:
@@ -106,12 +99,3 @@ class AppBackend:
         elapsed_time_in_seconds = end - start
 
         return elapsed_time_in_seconds, results
-    #endregion
-
-    #region Multithreading
-    # Multithreading related methods can be added here
-    #endregion
-
-    #region Asyncio
-    # Asyncio related methods can be added here
-    #endregion

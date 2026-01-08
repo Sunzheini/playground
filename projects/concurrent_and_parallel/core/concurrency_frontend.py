@@ -39,13 +39,15 @@ class ConcurrencyFrontend:
         with ui.header().classes('bg-primary text-white'):
             ui.label('Python Concurrency Examples').classes('text-h4 font-bold')
             ui.space()
-            ui.button('ℹ️', on_click=self.show_info).props('flat')
+            ui.button('ℹ️', on_click=self._show_info).props('flat')
 
         # Main content
         with ui.row().classes('w-full'):
             # Left panel - Controls
             with ui.column().classes('w-1/3 p-4 space-y-4'):
                 ui.label('Task Configuration').classes('text-h5')
+
+                ui.label(f'{self._show_number_of_cores()}').classes('text-body2 text-blue-600')
 
                 self.task_type = ui.select(
                     options=['CPU Intensive', 'IO Intensive', 'Mixed'],
@@ -123,6 +125,21 @@ class ConcurrencyFrontend:
             except Exception:
                 # Last-resort fallback: ignore — NiceGUI will create the loop and the metrics won't run
                 pass
+    #endregion
+    
+    #region Info methods
+    def _show_info(self) -> None:
+        """Show information dialog describing the demo."""
+        with ui.dialog() as dialog, ui.card():
+            ui.label('About This Demo').classes('text-h6')
+            ui.markdown(self.backend.info_text)
+            ui.button('Close', on_click=dialog.close)
+        dialog.open()
+
+    def _show_number_of_cores(self) -> str:
+        """Show a dialog with the number of CPU cores."""
+        text = f'({self.backend.number_of_cores_text} CPU cores detected)'
+        return text
     #endregion
 
     #region Concurrency Methods
@@ -297,28 +314,4 @@ class ConcurrencyFrontend:
         self.history_table.rows.clear()
         self.history_table.update()
         ui.notify('Results cleared')
-
-    def show_info(self):
-        """Show information dialog describing the demo."""
-        with ui.dialog() as dialog, ui.card():
-            ui.label('About This Demo').classes('text-h6')
-            ui.markdown('''
-            ### Python Concurrency Demo
-
-            This application demonstrates different concurrency approaches in Python:
-
-            1. **Sequential**: Runs tasks one after another
-            2. **Threading**: Uses multiple threads (good for I/O-bound tasks)
-            3. **Multiprocessing**: Uses multiple processes (good for CPU-bound tasks)
-            4. **Asyncio**: Uses async/await for concurrent I/O operations
-
-            **Task Types:**
-            - CPU Intensive: Calculation of pi
-            - IO Intensive: Simulated file operations
-            - Mixed: Combination of both
-
-            Adjust the sliders to see how different parameters affect performance!
-            ''')
-            ui.button('Close', on_click=dialog.close)
-        dialog.open()
     #endregion
