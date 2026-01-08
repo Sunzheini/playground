@@ -29,7 +29,6 @@ class ConcurrencyFrontend:
         self.iterations = None
         self.num_tasks = None
         self.results_label = None
-        self.metrics_label = None
         self.cpu_label = None
         self.memory_label = None
         self.thread_count_label = None
@@ -63,7 +62,7 @@ class ConcurrencyFrontend:
         # Main content
         with ((ui.row().classes('w-full'))):
             # Left panel - Controls
-            with ui.column().classes('w-1/3 p-4 space-y-4'):
+            with ui.column().classes('33vw p-4 space-y-4'):
                 ui.label('Task Configuration').classes('text-h5')
 
                 ui.label(f'{self._show_number_of_cores()}').classes('text-body2 text-blue-600')
@@ -131,7 +130,7 @@ class ConcurrencyFrontend:
                                                            lambda e: self.num_tasks.set_value(e.args))
                     # endregion
 
-                # Execution buttons - NiceGUI supports async callbacks, so we use async handlers
+                #region Execution buttons (NiceGUI supports async callbacks)
                 with ui.row().classes('w-full space-x-2'):
                     ui.button('Sequential', on_click=self.run_sequential,
                               color='secondary').classes('flex-1')
@@ -141,40 +140,32 @@ class ConcurrencyFrontend:
                               color='secondary').classes('flex-1')
                     ui.button('Asyncio', on_click=self.run_asyncio,
                               color='secondary').classes('flex-1')
+                #endregion
 
-                # Results display
-                self.results_label = ui.label('Results will appear here').classes('text-body1')
-                self.metrics_label = ui.label('').classes('text-body1')
+                #region  Results display
+                with ui.card().classes('p-4 border border-gray-300 rounded-lg bg-gray-50 w-full'):
+                    ui.label('Results').classes('text-h6 font-bold mb-2')
+                    self.results_label = ui.label('Results will appear here').classes('text-body1')
+                #endregion
 
-                # Clear button
-                ui.button('Clear Results', on_click=self.clear_results, color='negative')
+                #region  Clear button
+                ui.button('Clear Execution History', on_click=self.clear_results, color='negative')
+                #endregion
 
-            # Right panel - Visualizations
-            with ui.column().classes('w-2/3 p-4 space-y-4'):
-                ui.label('Performance Metrics').classes('text-h5')
-
-                # Performance comparison chart (placeholder)
-                self.chart_container = ui.column().classes('w-full h-64')
-
-                # System resource monitoring
-                with ui.card().classes('w-full'):
-                    ui.label('System Resources').classes('text-h6')
-                    self.cpu_label = ui.label('CPU: --%').classes('text-body1')
-                    self.memory_label = ui.label('Memory: --%').classes('text-body1')
-                    self.thread_count_label = ui.label('Threads: --').classes('text-body1')
-
-                # Execution history
+            #region Execution history
+            with ui.column().classes('w-full p-4 space-y-4'):
                 with ui.card().classes('w-full'):
                     ui.label('Execution History').classes('text-h6')
                     self.history_table = ui.table(
                         columns=[
-                            {'name': 'timestamp', 'label': 'Time', 'field': 'timestamp'},
-                            {'name': 'method', 'label': 'Method', 'field': 'method'},
-                            {'name': 'time', 'label': 'Time (s)', 'field': 'time'},
-                            {'name': 'tasks', 'label': 'Tasks', 'field': 'tasks'}
+                            {'name': 'timestamp', 'label': 'Time', 'field': 'timestamp', 'align': 'left'},
+                            {'name': 'method', 'label': 'Method', 'field': 'method', 'align': 'left'},
+                            {'name': 'time', 'label': 'Time (s)', 'field': 'time', 'align': 'left'},
+                            {'name': 'tasks', 'label': 'Tasks', 'field': 'tasks', 'align': 'left'},
                         ],
                         rows=[]
                     ).classes('w-full')
+            #endregion
 
         # Schedule the metrics loop as a background task so it doesn't block UI creation
         # If there's already a running event loop (e.g. when NiceGUI is active), schedule the task immediately.
@@ -373,7 +364,6 @@ class ConcurrencyFrontend:
     def clear_results(self):
         """Clear UI results and history."""
         self.results_label.set_text('Results will appear here')
-        self.metrics_label.set_text('')
         self.history_table.rows.clear()
         self.history_table.update()
         ui.notify('Results cleared')
