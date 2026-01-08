@@ -75,12 +75,13 @@ class ConcurrencyFrontend:
                 ).classes('w-full')
 
                 # Two cards side by side in a row
-                with ui.row().classes('w-full gap-4'):
+                with ui.row().classes('w-full gap-4 items-stretch'):
 
-                    #region Iterations
-                    with ui.column().classes('flex-1'):  # flex-1 makes them share space equally
-                        with ui.card().classes('p-4 border-2 border-blue-200 rounded-lg'):
-                            ui.markdown('**Iterations per task** (how many times the selected task is executed within each parallel task)') \
+                    # region Iterations
+                    with ui.column().classes('flex-1'):
+                        with ui.card().classes('p-4 border-2 border-blue-200 rounded-lg h-full'):
+                            ui.markdown(
+                                '**Iterations per task** (how many times the selected task is executed within each parallel task)') \
                                 .classes('text-body2 q-mb-xs')
 
                             with ui.row().classes('items-center w-full gap-4'):
@@ -90,19 +91,22 @@ class ConcurrencyFrontend:
                                 # Slider
                                 self.iterations = ui.slider(
                                     min=1, max=100, value=5
-                                ).classes('flex-grow').on('update:model-value', lambda e: number_input.set_value(e.args))
+                                ).classes('flex-grow').on('update:model-value',
+                                                          lambda e: number_input.set_value(e.args))
 
                                 # Max value display
                                 ui.label('100').classes('text-caption text-grey w-12')
 
                                 number_input = ui.number(
                                     min=1, max=100, value=5
-                                ).classes('w-40 ml-36').on('update:model-value', lambda e: self.iterations.set_value(e.args))
-                    #endregion
+                                ).classes('w-40 ml-36').on('update:model-value',
+                                                           lambda e: self.iterations.set_value(e.args))
+                    # endregion
 
-                    #region Number of tasks
+                    # region Number of tasks
                     with ui.column().classes('flex-1'):
-                        with ui.card().classes('p-4 border-2 border-blue-200 rounded-lg mt-4'):
+                        with ui.card().classes(
+                                'p-4 border-2 border-blue-200 rounded-lg h-full'):
                             ui.markdown(
                                 '**Number of parallel tasks** (sequential run / separate processes / worker threads / coroutines)') \
                                 .classes('text-body2 q-mb-xs')
@@ -114,7 +118,8 @@ class ConcurrencyFrontend:
                                 # Slider
                                 self.num_tasks = ui.slider(
                                     min=1, max=20, value=4
-                                ).classes('flex-grow').on('update:model-value', lambda e: num_tasks_input.set_value(e.args))
+                                ).classes('flex-grow').on('update:model-value',
+                                                          lambda e: num_tasks_input.set_value(e.args))
 
                                 # Max value display
                                 ui.label('20').classes('text-caption text-grey w-12')
@@ -122,8 +127,9 @@ class ConcurrencyFrontend:
                                 # Number input for precise control
                                 num_tasks_input = ui.number(
                                     min=1, max=20, value=4
-                                ).classes('w-40 ml-36').on('update:model-value', lambda e: self.num_tasks.set_value(e.args))
-                    #endregion
+                                ).classes('w-40 ml-36').on('update:model-value',
+                                                           lambda e: self.num_tasks.set_value(e.args))
+                    # endregion
 
                 # Execution buttons - NiceGUI supports async callbacks, so we use async handlers
                 with ui.row().classes('w-full space-x-2'):
