@@ -10,6 +10,8 @@ import os
 
 # --- Top-level worker functions ---
 # Define worker functions at module level so they are picklable for ProcessPoolExecutor
+
+
 def cpu_intensive(n):
     """CPU-intensive task: calculate pi using Leibniz formula (slow but demonstrative)."""
     pi = 0
@@ -344,5 +346,5 @@ if __name__ == '__main__':
     demo.create_ui()
 
     # Run the NiceGUI server
-    port = int(os.environ.get('PORT', '8080'))
+    port = int(os.environ.get('PORT', '8081'))
     ui.run(title='Python Concurrency Demo', port=port, reload=False)
