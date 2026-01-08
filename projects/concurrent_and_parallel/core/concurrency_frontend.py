@@ -1,44 +1,20 @@
-from nicegui import ui
-import time
-import asyncio
-import threading
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-import multiprocessing
-import psutil
-from datetime import datetime
 import os
+import time
+from datetime import datetime
+import multiprocessing
+import threading
+import asyncio
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
-# --- Top-level worker functions ---
-# Define worker functions at module level so they are picklable for ProcessPoolExecutor
-
-
-def cpu_intensive(n):
-    """CPU-intensive task: calculate pi using Leibniz formula (slow but demonstrative)."""
-    pi = 0
-    for i in range(n):
-        pi += (-1) ** i / (2 * i + 1)
-    return pi * 4
+import psutil
+from nicegui import ui
 
 
-def io_intensive(n):
-    """IO-intensive task: simulate file operations with sleep."""
-    # time.sleep blocks the current thread; in our code we run this in a thread or process.
-    time.sleep(0.001 * (n / 10000))
-    return n * 2
-
-
-def mixed_task_func(n):
-    """Mixed CPU + IO task implemented at module level for pickling."""
-    result = 0
-    for i in range(n // 10):
-        result += i ** 0.5
-    time.sleep(0.0005 * (n / 10000))
-    return result
-
-
-class ConcurrencyDemo:
-    # Limit history rows to avoid unbounded growth in the UI
-    MAX_HISTORY = 200
+class ConcurrencyFrontend:
+    """
+    Manages concurrency demonstrations using different methods.
+    """
+    MAX_EXECUTION_HISTORY_RECORDS = 200
 
     def __init__(self):
         self.running_tasks = set()
@@ -46,9 +22,6 @@ class ConcurrencyDemo:
         self.cpu_usage = []
         self.memory_usage = []
         self.start_time = None
-
-        # Prime psutil so the first cpu_percent() call returns a valid value
-        psutil.cpu_percent()
 
     def create_ui(self):
         """Create the main UI layout and schedule background metrics."""
@@ -172,7 +145,7 @@ class ConcurrencyDemo:
         self.update_performance_chart(method, duration)
 
     def add_to_history(self, method, duration, num_tasks):
-        """Add execution to history table and cap size to MAX_HISTORY."""
+        """Add execution to history table and cap size to MAX_EXECUTION_HISTORY_RECORDS."""
         history = self.history_table.rows
         history.append({
             'timestamp': datetime.now().strftime('%H:%M:%S'),
@@ -181,8 +154,8 @@ class ConcurrencyDemo:
             'tasks': num_tasks
         })
         # Keep history bounded
-        if len(history) > self.MAX_HISTORY:
-            del history[0: len(history) - self.MAX_HISTORY]
+        if len(history) > self.MAX_EXECUTION_HISTORY_RECORDS:
+            del history[0: len(history) - self.MAX_EXECUTION_HISTORY_RECORDS]
         self.history_table.update()
 
     def update_performance_chart(self, method, duration):
@@ -342,7 +315,7 @@ class ConcurrencyDemo:
 
 # Protect entry point for Windows so ProcessPool spawn doesn't re-import code unsafely
 if __name__ == '__main__':
-    demo = ConcurrencyDemo()
+    demo = ConcurrencyFrontend()
     demo.create_ui()
 
     # Run the NiceGUI server
