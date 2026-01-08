@@ -1,3 +1,6 @@
+"""
+Frontend for demonstrating Python concurrency methods using NiceGUI.
+"""
 import os
 import time
 from datetime import datetime
@@ -9,6 +12,8 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import psutil
 from nicegui import ui
 
+from projects.concurrent_and_parallel.helpers.simulated_tasks import cpu_intensive_task, io_intensive_task, mixed_task
+
 
 class ConcurrencyFrontend:
     """
@@ -16,20 +21,23 @@ class ConcurrencyFrontend:
     """
     MAX_EXECUTION_HISTORY_RECORDS = 200
 
-    def __init__(self):
+    def __init__(self, backend):
+        self.backend = backend
+
         self.running_tasks = set()
         self.results = []
         self.cpu_usage = []
         self.memory_usage = []
         self.start_time = None
 
+    #region UI Creation
     def create_ui(self):
         """Create the main UI layout and schedule background metrics."""
-        ui.colors(primary='#6E93D6', secondary='#53B689', accent='#111B1E', positive='#53B689')
+        ui.colors(primary='#496CAB', secondary='#53B689', accent='#111B1E', positive='#53B689')
 
         # Header
         with ui.header().classes('bg-primary text-white'):
-            ui.label('Python Concurrency Demo').classes('text-h4 font-bold')
+            ui.label('Python Concurrency Examples').classes('text-h4 font-bold')
             ui.space()
             ui.button('ℹ️', on_click=self.show_info).props('flat')
 
@@ -115,16 +123,18 @@ class ConcurrencyFrontend:
             except Exception:
                 # Last-resort fallback: ignore — NiceGUI will create the loop and the metrics won't run
                 pass
+    #endregion
 
+    #region Concurrency Methods
     def get_task_function(self):
         """Return a module-level function (picklable) for the selected task type."""
         task_type = self.task_type.value
         if task_type == 'CPU Intensive':
-            return cpu_intensive
+            return cpu_intensive_task
         elif task_type == 'IO Intensive':
-            return io_intensive
+            return io_intensive_task
         else:
-            return mixed_task_func
+            return mixed_task
 
     def start_execution(self, method):
         """Prepare for execution: reset results and mark start time."""
@@ -311,13 +321,4 @@ class ConcurrencyFrontend:
             ''')
             ui.button('Close', on_click=dialog.close)
         dialog.open()
-
-
-# Protect entry point for Windows so ProcessPool spawn doesn't re-import code unsafely
-if __name__ == '__main__':
-    demo = ConcurrencyFrontend()
-    demo.create_ui()
-
-    # Run the NiceGUI server
-    port = int(os.environ.get('PORT', '8081'))
-    ui.run(title='Python Concurrency Demo', port=port, reload=False)
+    #endregion

@@ -178,18 +178,18 @@
 
 import os
 
+from nicegui import ui
+
 from projects.concurrent_and_parallel.core.app_backend import AppBackend
-from projects.concurrent_and_parallel.frontend.nicegui_ui import NiceGuiUI
+from projects.concurrent_and_parallel.core.concurrency_frontend import ConcurrencyFrontend
 
 
-def main():
-    """Main entry point"""
-    backend = AppBackend().current_backend
-    frontend = NiceGuiUI(backend).current_ui
-
-    port = int(os.environ.get('PORT', '8080'))
-    frontend.run(title='Python Concurrency Demo', port=port, reload=False)
-
-
+# Protect entry point for Windows so ProcessPool spawn doesn't re-import code unsafely
 if __name__ == '__main__':
-    main()
+    backend = AppBackend()
+    frontend = ConcurrencyFrontend(backend)
+    frontend.create_ui()
+
+    # Run the NiceGUI server
+    port = int(os.environ.get('PORT', '8080'))
+    ui.run(title='Python Concurrency Demo', port=port, reload=False)
