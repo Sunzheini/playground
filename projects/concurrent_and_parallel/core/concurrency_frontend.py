@@ -24,11 +24,30 @@ class ConcurrencyFrontend:
     def __init__(self, backend):
         self.backend = backend
 
+        #region ui elements
+        self.task_type = None
+        self.iterations = None
+        self.num_tasks = None
+        self.results_label = None
+        self.metrics_label = None
+        self.cpu_label = None
+        self.memory_label = None
+        self.thread_count_label = None
+        self.history_table = None
+        self.chart_container = None
+        #endregion
+
+        #region collections
+        self.task_choices = ['CPU Intensive', 'IO Intensive', 'Mixed']
+        #endregion
+
+        #region state
         self.running_tasks = set()
         self.results = []
         self.cpu_usage = []
         self.memory_usage = []
         self.start_time = None
+        #endregion
 
     #region UI Creation
     def create_ui(self):
@@ -42,7 +61,7 @@ class ConcurrencyFrontend:
             ui.button('ℹ️', on_click=self._show_info).props('flat')
 
         # Main content
-        with ui.row().classes('w-full'):
+        with ((ui.row().classes('w-full'))):
             # Left panel - Controls
             with ui.column().classes('w-1/3 p-4 space-y-4'):
                 ui.label('Task Configuration').classes('text-h5')
@@ -50,22 +69,61 @@ class ConcurrencyFrontend:
                 ui.label(f'{self._show_number_of_cores()}').classes('text-body2 text-blue-600')
 
                 self.task_type = ui.select(
-                    options=['CPU Intensive', 'IO Intensive', 'Mixed'],
+                    options=self.task_choices,
                     value='CPU Intensive',
                     label='Task Type'
                 ).classes('w-full')
 
-                # Iterations slider: NiceGUI Slider doesn't accept a `label` kwarg, create a label widget instead
-                ui.label('Iterations per task').classes('text-body2')
-                self.iterations = ui.slider(
-                    min=1000, max=10000000, value=1000000
-                ).classes('w-full')
+                # Two cards side by side in a row
+                with ui.row().classes('w-full gap-4'):
 
-                # Number of tasks slider: create a label separately
-                ui.label('Number of parallel tasks').classes('text-body2')
-                self.num_tasks = ui.slider(
-                    min=1, max=20, value=4
-                ).classes('w-full')
+                    #region Iterations
+                    with ui.column().classes('flex-1'):  # flex-1 makes them share space equally
+                        with ui.card().classes('p-4 border-2 border-blue-200 rounded-lg'):
+                            ui.markdown('**Iterations per task** (how many times the selected task is executed within each parallel task)') \
+                                .classes('text-body2 q-mb-xs')
+
+                            with ui.row().classes('items-center w-full gap-4'):
+                                # Min value display
+                                ui.label('1').classes('text-caption text-grey w-12')
+
+                                # Slider
+                                self.iterations = ui.slider(
+                                    min=1, max=100, value=5
+                                ).classes('flex-grow').on('update:model-value', lambda e: number_input.set_value(e.args))
+
+                                # Max value display
+                                ui.label('100').classes('text-caption text-grey w-12')
+
+                                number_input = ui.number(
+                                    min=1, max=100, value=5
+                                ).classes('w-40 ml-36').on('update:model-value', lambda e: self.iterations.set_value(e.args))
+                    #endregion
+
+                    #region Number of tasks
+                    with ui.column().classes('flex-1'):
+                        with ui.card().classes('p-4 border-2 border-blue-200 rounded-lg mt-4'):
+                            ui.markdown(
+                                '**Number of parallel tasks** (sequential run / separate processes / worker threads / coroutines)') \
+                                .classes('text-body2 q-mb-xs')
+
+                            with ui.row().classes('items-center w-full gap-4'):
+                                # Min value display
+                                ui.label('1').classes('text-caption text-grey w-12')
+
+                                # Slider
+                                self.num_tasks = ui.slider(
+                                    min=1, max=20, value=4
+                                ).classes('flex-grow').on('update:model-value', lambda e: num_tasks_input.set_value(e.args))
+
+                                # Max value display
+                                ui.label('20').classes('text-caption text-grey w-12')
+
+                                # Number input for precise control
+                                num_tasks_input = ui.number(
+                                    min=1, max=20, value=4
+                                ).classes('w-40 ml-36').on('update:model-value', lambda e: self.num_tasks.set_value(e.args))
+                    #endregion
 
                 # Execution buttons - NiceGUI supports async callbacks, so we use async handlers
                 with ui.row().classes('w-full space-x-2'):
