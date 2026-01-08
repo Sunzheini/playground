@@ -6,7 +6,7 @@ import multiprocessing
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
-from projects.concurrent_and_parallel.helpers.helper_functions import counter
+from functools import partial
 
 
 class AppBackend:
@@ -79,7 +79,18 @@ class AppBackend:
 
         return ('Sequential', duration, results), ('Sequential', duration, number_of_tasks)
 
-    async def run_multiprocessing(self, task_function, number_of_iterations: int, number_of_tasks: int):
+    async def run_multiprocessing_executor_approach(self, task_function, number_of_iterations: int, number_of_tasks: int):
+        """
+        Multiprocessing approach using ProcessPoolExecutor.
+        :param task_function: the function to execute in parallel
+        :param number_of_iterations: the number of iterations for each task
+        :param number_of_tasks: the number of parallel tasks to run
+        :return: tuple containing results and performance metrics
+
+        Demonstrates:
+        1. Using ProcessPoolExecutor for parallel execution
+        2. Automatic process management
+        """
         def sync_run():
             results = []
             # Use 'spawn' context for safety on Windows
@@ -99,46 +110,64 @@ class AppBackend:
 
         return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_tasks)
 
-    @staticmethod
-    def parallel_processes(number_of_processes: int, number_to_count: int, queue=False) -> tuple[float, list]:
+    def _multiprocessing_worker(self, task_function, iterations, task_id, results_queue=None):
+        """Module-level worker for manual multiprocessing."""
+        try:
+            result = task_function(iterations)
+            if results_queue is not None:
+                results_queue.put((task_id, result))
+            return result
+        except Exception as e:
+            if results_queue is not None:
+                results_queue.put((task_id, e))
+            return e
+
+    async def run_multiprocessing_manual_approach(self, task_function, number_of_processes: int,number_of_iterations: int, use_queue=False):
         """
-        Run parallel processes.
-        :param number_of_processes: The number of processes to run.
-        :param number_to_count: The number each process should count to.
-        :param queue: An optional Queue for inter-process communication.
-        :return: Elapsed time in seconds.
+        Manual multiprocessing approach using multiprocessing.Process directly.
+        :param task_function: the function to execute in each process
+        :param number_of_processes: the number of processes to create
+        :param number_of_iterations: the number of iterations for each task
+        :param use_queue: whether to use a multiprocessing.Queue for results
+        :return: tuple containing results and performance metrics
+
+        Demonstrates:
+        1. Direct process creation with multiprocessing.Process
+        2. Manual process lifecycle management (start/join)
+        3. Inter-process communication with Queue
+        4. Lower-level control compared to ProcessPoolExecutor
         """
-        processes = []
-        queue = multiprocessing.Queue() if queue else None  # create a queue for inter-process communication
+        def sync_run():
+            processes = []
+            results_queue = multiprocessing.Queue() if use_queue else None
+            results = []
 
-        start = time.perf_counter()
+            # 1. Create and start processes
+            for process_id in range(number_of_processes):
+                p = multiprocessing.Process(
+                    target=self._multiprocessing_worker,  # Use module-level function
+                    args=(task_function, number_of_iterations, process_id, results_queue)
+                )
+                p.start()
+                processes.append(p)
 
-        # 1. Start processes -----------------------------------------------------------
-        for process_number in range(number_of_processes):
-            p = multiprocessing.Process(target=counter, args=(number_to_count, queue, process_number))
+            # 2. Wait for all processes to complete
+            for p in processes:
+                p.join()
 
-            p.start()   # 1. start the process
-            processes.append(p)
-        # ------------------------------------------------------------------------------
+            # 3. Collect results from queue if used
+            if results_queue:
+                while not results_queue.empty():
+                    task_id, result = results_queue.get()
+                    results.append(result)
 
-        # 2. Wait for processes to finish ----------------------------------------------
-        for p in processes:
-            p.join()
-        # ------------------------------------------------------------------------------
+            return results
 
-        # 3. Collect results from queue (consumer) -------------------------------------
-        results = []
-        if queue is not None:
-            while not queue.empty():
-                results.append(queue.get())
+        start = time.time()
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
 
-            print(f"Results from processes: {results}")
-        # ------------------------------------------------------------------------------
-
-        end = time.perf_counter()
-        elapsed_time_in_seconds = end - start
-
-        return elapsed_time_in_seconds, results
+        return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_processes)
 
     async def run_multithreading(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Wrap the synchronous ThreadPool work in a function and run it in a thread
