@@ -18,7 +18,7 @@ class AppBackend:
         :return: A string representing multithreading info.
         """
         text = '''
-        ### Python Concurrency Demo
+        ## Python Concurrency Examples
 
         This application demonstrates different concurrency approaches in Python:
 

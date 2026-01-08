@@ -195,7 +195,6 @@ class ConcurrencyFrontend:
     def _show_info(self) -> None:
         """Show information dialog describing the demo."""
         with ui.dialog() as dialog, ui.card():
-            ui.label('About This Demo').classes('text-h6')
             ui.markdown(self.backend.info_text)
             ui.button('Close', on_click=dialog.close)
         dialog.open()
