@@ -62,24 +62,8 @@ class AppBackend:
     #endregion
 
     #region Methods
-    async def run_sequential(self, task_function, number_of_iterations: int, number_of_tasks: int):
-        # Execute the blocking loop in a background thread
-        def sync_run():
-            results = []
-            for _ in range(number_of_tasks):
-                try:
-                    results.append(task_function(number_of_iterations))
-                except Exception as e:
-                    results.append(e)
-            return results
-
-        start = time.time()
-        results = await asyncio.to_thread(sync_run)
-        duration = time.time() - start
-
-        return ('Sequential', duration, results), ('Sequential', duration, number_of_tasks)
-
-    async def run_multiprocessing_executor_approach(self, task_function, number_of_iterations: int, number_of_tasks: int):
+    @staticmethod
+    async def run_multiprocessing_executor_approach(task_function, number_of_iterations: int, number_of_tasks: int):
         """
         Multiprocessing approach using ProcessPoolExecutor.
         :param task_function: the function to execute in parallel
@@ -110,7 +94,8 @@ class AppBackend:
 
         return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_tasks)
 
-    def _multiprocessing_worker(self, task_function, iterations, task_id, results_queue=None):
+    @staticmethod
+    def _multiprocessing_worker(task_function, iterations, task_id, results_queue=None):
         """Module-level worker for manual multiprocessing."""
         try:
             result = task_function(iterations)
@@ -122,7 +107,8 @@ class AppBackend:
                 results_queue.put((task_id, e))
             return e
 
-    async def run_multiprocessing_manual_approach(self, task_function, number_of_processes: int,number_of_iterations: int, use_queue=False):
+    @staticmethod
+    async def run_multiprocessing_manual_approach(task_function, number_of_processes: int, number_of_iterations: int, use_queue=False):
         """
         Manual multiprocessing approach using multiprocessing.Process directly.
         :param task_function: the function to execute in each process
@@ -145,7 +131,7 @@ class AppBackend:
             # 1. Create and start processes
             for process_id in range(number_of_processes):
                 p = multiprocessing.Process(
-                    target=self._multiprocessing_worker,  # Use module-level function
+                    target=AppBackend._multiprocessing_worker,  # Use module-level function
                     args=(task_function, number_of_iterations, process_id, results_queue)
                 )
                 p.start()
@@ -168,6 +154,23 @@ class AppBackend:
         duration = time.time() - start
 
         return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_processes)
+
+    async def run_sequential(self, task_function, number_of_iterations: int, number_of_tasks: int):
+        # Execute the blocking loop in a background thread
+        def sync_run():
+            results = []
+            for _ in range(number_of_tasks):
+                try:
+                    results.append(task_function(number_of_iterations))
+                except Exception as e:
+                    results.append(e)
+            return results
+
+        start = time.time()
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        return ('Sequential', duration, results), ('Sequential', duration, number_of_tasks)
 
     async def run_multithreading(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Wrap the synchronous ThreadPool work in a function and run it in a thread

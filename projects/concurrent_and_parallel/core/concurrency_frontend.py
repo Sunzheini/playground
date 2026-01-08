@@ -229,6 +229,21 @@ class ConcurrencyFrontend:
     #endregion
 
     #region Concurrency Methods
+    async def run_multiprocessing(self):
+        """Run tasks using ProcessPoolExecutor safely on Windows and without blocking the event loop.
+        Uses module-level functions (picklable) and spawn context to avoid Windows issues.
+        """
+        self.start_execution('Multiprocessing')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        # results, history = await self.backend.run_multiprocessing_executor_approach(task_func, num_iterations, num_tasks)
+        results, history = await self.backend.run_multiprocessing_manual_approach(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
     async def run_sequential(self):
         """Run tasks sequentially but offload the actual computation to a thread.
 
@@ -241,21 +256,6 @@ class ConcurrencyFrontend:
         num_tasks = int(self.num_tasks.value)
 
         results, history = await self.backend.run_sequential(task_func, num_iterations, num_tasks)
-
-        self.show_results(*results)
-        self.add_to_history(*history)
-
-    async def run_multiprocessing(self):
-        """Run tasks using ProcessPoolExecutor safely on Windows and without blocking the event loop.
-        Uses module-level functions (picklable) and spawn context to avoid Windows issues.
-        """
-        self.start_execution('Multiprocessing')
-        task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
-
-        # results, history = await self.backend.run_multiprocessing_executor_approach(task_func, num_iterations, num_tasks)
-        results, history = await self.backend.run_multiprocessing_manual_approach(task_func, num_iterations, num_tasks)
 
         self.show_results(*results)
         self.add_to_history(*history)
