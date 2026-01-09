@@ -61,7 +61,7 @@ class AppBackend:
 
     #region Methods
     @staticmethod
-    async def run_multiprocessing_executor_approach(task_function, number_of_iterations: int, number_of_tasks: int):
+    async def run_multiprocessing_executor_approach(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
         """
         Multiprocessing approach using ProcessPoolExecutor.
         :param task_function: the function to execute in parallel
@@ -88,6 +88,7 @@ class AppBackend:
                 Creates number_tasks Future objects
                 Each Future represents a task running in a separate process
                 Tasks start executing immediately (when workers available)
+                No explicit queue needed - Futures handle result collection internally
                 """
                 futures = [executor.submit(task_function, number_of_iterations) for _ in range(number_of_tasks)]
 
@@ -123,7 +124,7 @@ class AppBackend:
             return e
 
     @staticmethod
-    async def run_multiprocessing_manual_approach(task_function, number_of_processes: int, number_of_iterations: int, use_queue=False):
+    async def run_multiprocessing_manual_approach_with_queue(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
         """
         Manual multiprocessing approach using multiprocessing.Process directly.
         :param task_function: the function to execute in each process
@@ -139,14 +140,15 @@ class AppBackend:
         4. Lower-level control compared to ProcessPoolExecutor
         """
         def sync_run():
-            processes = []
-            results_queue = multiprocessing.Queue() if use_queue else None
             results = []
 
+            processes = []
+            results_queue = multiprocessing.Queue()
+
             # 1. Create and start processes
-            for process_id in range(number_of_processes):
+            for process_id in range(number_of_tasks):
                 p = multiprocessing.Process(
-                    target=AppBackend._multiprocessing_worker,  # Use module-level function
+                    target=AppBackend._multiprocessing_worker,
                     args=(task_function, number_of_iterations, process_id, results_queue)
                 )
                 p.start()
@@ -156,11 +158,10 @@ class AppBackend:
             for p in processes:
                 p.join()
 
-            # 3. Collect results from queue if used
-            if results_queue:
-                while not results_queue.empty():
-                    task_id, result = results_queue.get()
-                    results.append(result)
+            # 3. Collect results
+            while not results_queue.empty():
+                task_id, result = results_queue.get()
+                results.append(result)
 
             return results
 
@@ -168,7 +169,7 @@ class AppBackend:
         results = await asyncio.to_thread(sync_run)
         duration = time.time() - start
 
-        return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_processes)
+        return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_tasks)
 
     async def run_sequential(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Execute the blocking loop in a background thread
