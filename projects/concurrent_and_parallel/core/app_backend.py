@@ -6,8 +6,6 @@ import multiprocessing
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
-from functools import partial
-
 
 class AppBackend:
     """
@@ -76,19 +74,36 @@ class AppBackend:
         2. Automatic process management
         """
         def sync_run():
+            """
+            Wraps blocking multiprocessing operations
+            Needed because multiprocessing is synchronous/blocking
+            :return: list of results from all tasks
+            """
             results = []
-            # Use 'spawn' context for safety on Windows
-            ctx = multiprocessing.get_context('spawn')
+            ctx = multiprocessing.get_context('spawn')  # Safe for Windows (creates fresh Python processes)
+
+            # 1. Create and start processes
             with ProcessPoolExecutor(max_workers=number_of_tasks, mp_context=ctx) as executor:
+                """
+                Creates number_tasks Future objects
+                Each Future represents a task running in a separate process
+                Tasks start executing immediately (when workers available)
+                """
                 futures = [executor.submit(task_function, number_of_iterations) for _ in range(number_of_tasks)]
+
+                # 2. Wait for all processes to complete / 3. Collect results
                 for f in futures:
                     try:
-                        results.append(f.result())
+                        results.append(f.result())  # Blocks until task completes
                     except Exception as e:
                         results.append(e)
             return results
 
         start = time.time()
+        """
+        asyncio.to_thread(sync_run): Offloads blocking sync_run() to thread pool
+        Why?: Keeps NiceGUI event loop responsive
+        Alternative without threads: Would block UI during execution"""
         results = await asyncio.to_thread(sync_run)
         duration = time.time() - start
 

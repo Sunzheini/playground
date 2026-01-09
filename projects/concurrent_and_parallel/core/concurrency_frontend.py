@@ -89,7 +89,7 @@ class ConcurrencyFrontend:
 
                                 # Slider
                                 self.iterations = ui.slider(
-                                    min=1, max=100, value=5
+                                    min=1, max=100, value=20
                                 ).classes('flex-grow').on('update:model-value',
                                                           lambda e: number_input.set_value(e.args))
 
@@ -97,7 +97,7 @@ class ConcurrencyFrontend:
                                 ui.label('100').classes('text-caption text-grey w-12')
 
                                 number_input = ui.number(
-                                    min=1, max=100, value=5
+                                    min=1, max=100, value=20
                                 ).classes('w-40 ml-36').on('update:model-value',
                                                            lambda e: self.iterations.set_value(e.args))
                     # endregion
@@ -116,7 +116,7 @@ class ConcurrencyFrontend:
 
                                 # Slider
                                 self.num_tasks = ui.slider(
-                                    min=1, max=20, value=4
+                                    min=1, max=20, value=5
                                 ).classes('flex-grow').on('update:model-value',
                                                           lambda e: num_tasks_input.set_value(e.args))
 
@@ -125,7 +125,7 @@ class ConcurrencyFrontend:
 
                                 # Number input for precise control
                                 num_tasks_input = ui.number(
-                                    min=1, max=20, value=4
+                                    min=1, max=20, value=5
                                 ).classes('w-40 ml-36').on('update:model-value',
                                                            lambda e: self.num_tasks.set_value(e.args))
                     # endregion
@@ -152,8 +152,7 @@ class ConcurrencyFrontend:
                 ui.button('Clear Execution History', on_click=self.clear_results, color='negative')
                 #endregion
 
-            #region Execution history
-            with ui.column().classes('w-full p-4 space-y-4'):
+                #region Execution history
                 with ui.card().classes('w-full'):
                     ui.label('Execution History').classes('text-h6')
                     self.history_table = ui.table(
@@ -165,7 +164,7 @@ class ConcurrencyFrontend:
                         ],
                         rows=[]
                     ).classes('w-full')
-            #endregion
+                #endregion
     #endregion
     
     #region General methods
@@ -201,9 +200,10 @@ class ConcurrencyFrontend:
         """Display execution results with a defensive guard for empty results."""
         avg = duration / len(results) if results else 0.0  # avoid division by zero
         self.results_label.set_text(
-            f'{method} completed in {duration:.3f} seconds\n'
-            f'Processed {len(results)} tasks\n'
-            f'Average time per task: {avg:.3f}s'
+            f'{method} completed in {duration:.3f} seconds.\n'
+            f'Processed {len(results)} tasks.\n'
+            f'Average time per task: {avg:.3f}s.\n'
+            f'Results: {results}.'
         )
 
     def add_to_history(self, method, duration, num_tasks) -> None:
@@ -238,8 +238,8 @@ class ConcurrencyFrontend:
         num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        # results, history = await self.backend.run_multiprocessing_executor_approach(task_func, num_iterations, num_tasks)
-        results, history = await self.backend.run_multiprocessing_manual_approach(task_func, num_iterations, num_tasks)
+        results, history = await self.backend.run_multiprocessing_executor_approach(task_func, num_iterations, num_tasks)
+        # results, history = await self.backend.run_multiprocessing_manual_approach(task_func, num_iterations, num_tasks)
 
         self.show_results(*results)
         self.add_to_history(*history)
