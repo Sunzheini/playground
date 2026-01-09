@@ -60,7 +60,7 @@ class ConcurrencyFrontend:
             ui.button('ℹ️', on_click=self._show_info).props('flat')
 
         # Main content
-        with ((ui.row().classes('w-full'))):
+        with (((ui.row().classes('w-full')))):
             # Left panel - Controls
             with ui.column().classes('33vw p-4 space-y-4'):
                 ui.label('Task Configuration').classes('text-h5')
@@ -164,8 +164,12 @@ class ConcurrencyFrontend:
 
                 #region  Results display
                 with ui.card().classes('p-4 border border-gray-300 rounded-lg bg-gray-50 w-full'):
-                    ui.label('Results').classes('text-h6 font-bold mb-2')
-                    self.results_label = ui.label('Results will appear here').classes('text-body1')
+                    ui.label('Results').classes('text-h6 font-bold mb-0')
+
+                    # Container with fixed height and scrolling
+                    with ui.scroll_area().classes('max-h-32 w-full'):  # max-h-32 limits height to ~128px
+                        self.results_label = ui.label('Results will appear here') \
+                            .classes('text-body1 break-words whitespace-pre-line')
                 #endregion
 
                 #region  Clear button
