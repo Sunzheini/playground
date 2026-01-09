@@ -150,6 +150,16 @@ class ConcurrencyFrontend:
                               color='secondary').classes('flex-1')
                     ui.button('',
                               color='secondary').classes('flex-1')
+
+                with ui.row().classes('w-full space-x-2'):
+                    ui.button('',
+                              color='secondary').classes('flex-1')
+                    ui.button('Multipr. (external program)', on_click=self.run_multiprocessing_another_program,
+                              color='secondary').classes('flex-1')
+                    ui.button('',
+                              color='secondary').classes('flex-1')
+                    ui.button('',
+                              color='secondary').classes('flex-1')
                 #endregion
 
                 #region  Results display
@@ -239,7 +249,7 @@ class ConcurrencyFrontend:
     #endregion
 
     #region Concurrency Methods
-    async def run_multiprocessing_manual(self):
+    async def run_multiprocessing_manual(self) -> None:
         """Run tasks manually using multiprocessing.Process and Queue safely on Windows.
         Uses module-level functions (picklable) and spawn context to avoid Windows issues.
         """
@@ -253,7 +263,7 @@ class ConcurrencyFrontend:
         self.show_results(*results)
         self.add_to_history(*history)
 
-    async def run_multiprocessing_auto(self):
+    async def run_multiprocessing_auto(self) -> None:
         """Run tasks using ProcessPoolExecutor safely on Windows and without blocking the event loop.
         Uses module-level functions (picklable) and spawn context to avoid Windows issues.
         """
@@ -263,6 +273,13 @@ class ConcurrencyFrontend:
         num_tasks = int(self.num_tasks.value)
 
         results, history = await self.backend.run_multiprocessing_executor_approach(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_multiprocessing_another_program(self) -> None:
+        """"Run tasks using an external Python program via multiprocessing."""
+        results, history = await self.backend.run_multiprocessing_external_program()
 
         self.show_results(*results)
         self.add_to_history(*history)

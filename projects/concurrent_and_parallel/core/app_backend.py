@@ -3,6 +3,8 @@ Module: app_backend
 """
 import asyncio
 import multiprocessing
+import os
+import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
@@ -23,10 +25,10 @@ class AppBackend:
 
         This application demonstrates different concurrency approaches in Python:
 
-        1. **Sequential**: Runs tasks one after another
+        **Sequential**: Runs tasks one after another
 
 
-        2. **Multiprocessing**: Uses multiple processes (good for CPU-bound tasks)
+        **Multiprocessing**: Uses multiple processes (good for CPU-bound tasks)
         Tasks that require true parallel execution without GIL interference 
         (GUI frameworks run in a single main thread, and blocking operations freeze the event loop.)
         (Tkinter does not natively support async/await)!
@@ -34,11 +36,21 @@ class AppBackend:
         Runs in separate processes, separate memory.
         Each process has its own Python interpreter, so GIL is not a bottleneck.
         More memory and setup overhead than threads or asyncio.
+        
+        Process Pool Benefits:
+        1. Process Reuse**: Creating processes is expensive. Pools reuse them.
+        2. Load Balancing**: Tasks automatically distributed to available workers.
+        3. Resource Management**: Automatic cleanup with context manager.
+        4. Queue Management**: Internal result collection (no manual Queue needed).
+        
+        Running External Programs:
+        1. Python can start external programs using the 'subprocess' module.
+        2. This creates a completely separate process with its own memory space.
 
-        3. **Threading**: Uses multiple threads (good for I/O-bound tasks)
+        **Threading**: Uses multiple threads (good for I/O-bound tasks)
 
 
-        4. **Asyncio**: Uses async/await for concurrent I/O operations
+        **Asyncio**: Uses async/await for concurrent I/O operations
 
         **Task Types:**
         - CPU Intensive: e.g. Calculations, Data processing
@@ -171,6 +183,58 @@ class AppBackend:
         duration = time.time() - start
 
         return ('Multiprocessing (auto)', duration, results), ('Multiprocessing (auto)', duration, number_of_tasks)
+
+    @staticmethod
+    async def run_multiprocessing_external_program() -> tuple:
+        """
+    Demonstrate running code in a separate process using subprocess.
+    This shows how to start another program from Python.
+    """
+        def sync_run():
+            # Safe command that works on all systems
+            if os.name == 'nt':  # Windows
+                command = ['cmd', '/c', 'echo', 'Hello from external process']
+            else:  # Unix/Linux/Mac
+                command = ['echo', 'Hello from external process']
+
+            try:
+                # Run the external command
+                result = subprocess.run(
+                    command,
+                    capture_output=True,  # Capture output
+                    text=True,            # Return as text
+                    timeout=5             # Timeout after 5 seconds
+                )
+
+                # Return info about the external process
+                return {
+                    'return_code': result.returncode,
+                    'stdout': result.stdout.strip(),
+                    'stderr': result.stderr.strip(),
+                    'command': ' '.join(command)
+                }
+
+            except subprocess.TimeoutExpired:
+                return {'error': 'Process timed out'}
+            except Exception as e:
+                return {'error': str(e)}
+
+        start = time.time()
+        process_info = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        # Format results for display
+        if 'error' in process_info:
+            results = [f"Error: {process_info['error']}"]
+        else:
+            results = [
+                f"Command: {process_info['command']}",
+                f"Return code: {process_info['return_code']}",
+                f"Output: {process_info['stdout']}",
+                f"Errors: {process_info['stderr'] or 'None'}"
+            ]
+
+        return ('External Process', duration, results), ('External Process', duration, 1)
 
     async def run_sequential(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Execute the blocking loop in a background thread
