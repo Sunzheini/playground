@@ -134,11 +134,21 @@ class ConcurrencyFrontend:
                 with ui.row().classes('w-full space-x-2'):
                     ui.button('Sequential', on_click=self.run_sequential,
                               color='secondary').classes('flex-1')
+                    ui.button('Multiprocessing (manual)', on_click=self.run_multiprocessing_manual,
+                              color='secondary').classes('flex-1')
                     ui.button('Threading', on_click=self.run_multithreading,
                               color='secondary').classes('flex-1')
-                    ui.button('Multiprocessing', on_click=self.run_multiprocessing,
-                              color='secondary').classes('flex-1')
                     ui.button('Asyncio', on_click=self.run_asyncio,
+                              color='secondary').classes('flex-1')
+
+                with ui.row().classes('w-full space-x-2'):
+                    ui.button('',
+                              color='secondary').classes('flex-1')
+                    ui.button('Multiprocessing (auto)', on_click=self.run_multiprocessing_auto,
+                              color='secondary').classes('flex-1')
+                    ui.button('',
+                              color='secondary').classes('flex-1')
+                    ui.button('',
                               color='secondary').classes('flex-1')
                 #endregion
 
@@ -229,7 +239,21 @@ class ConcurrencyFrontend:
     #endregion
 
     #region Concurrency Methods
-    async def run_multiprocessing(self):
+    async def run_multiprocessing_manual(self):
+        """Run tasks manually using multiprocessing.Process and Queue safely on Windows.
+        Uses module-level functions (picklable) and spawn context to avoid Windows issues.
+        """
+        self.start_execution('Multiprocessing')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.run_multiprocessing_manual_approach_with_queue(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_multiprocessing_auto(self):
         """Run tasks using ProcessPoolExecutor safely on Windows and without blocking the event loop.
         Uses module-level functions (picklable) and spawn context to avoid Windows issues.
         """
@@ -238,8 +262,7 @@ class ConcurrencyFrontend:
         num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        # results, history = await self.backend.run_multiprocessing_executor_approach(task_func, num_iterations, num_tasks)
-        results, history = await self.backend.run_multiprocessing_manual_approach_with_queue(task_func, num_iterations, num_tasks)
+        results, history = await self.backend.run_multiprocessing_executor_approach(task_func, num_iterations, num_tasks)
 
         self.show_results(*results)
         self.add_to_history(*history)

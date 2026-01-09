@@ -61,56 +61,6 @@ class AppBackend:
 
     #region Methods
     @staticmethod
-    async def run_multiprocessing_executor_approach(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
-        """
-        Multiprocessing approach using ProcessPoolExecutor.
-        :param task_function: the function to execute in parallel
-        :param number_of_iterations: the number of iterations for each task
-        :param number_of_tasks: the number of parallel tasks to run
-        :return: tuple containing results and performance metrics
-
-        Demonstrates:
-        1. Using ProcessPoolExecutor for parallel execution
-        2. Automatic process management
-        """
-        def sync_run():
-            """
-            Wraps blocking multiprocessing operations
-            Needed because multiprocessing is synchronous/blocking
-            :return: list of results from all tasks
-            """
-            results = []
-            ctx = multiprocessing.get_context('spawn')  # Safe for Windows (creates fresh Python processes)
-
-            # 1. Create and start processes
-            with ProcessPoolExecutor(max_workers=number_of_tasks, mp_context=ctx) as executor:
-                """
-                Creates number_tasks Future objects
-                Each Future represents a task running in a separate process
-                Tasks start executing immediately (when workers available)
-                No explicit queue needed - Futures handle result collection internally
-                """
-                futures = [executor.submit(task_function, number_of_iterations) for _ in range(number_of_tasks)]
-
-                # 2. Wait for all processes to complete / 3. Collect results
-                for f in futures:
-                    try:
-                        results.append(f.result())  # Blocks until task completes
-                    except Exception as e:
-                        results.append(e)
-            return results
-
-        start = time.time()
-        """
-        asyncio.to_thread(sync_run): Offloads blocking sync_run() to thread pool
-        Why?: Keeps NiceGUI event loop responsive
-        Alternative without threads: Would block UI during execution"""
-        results = await asyncio.to_thread(sync_run)
-        duration = time.time() - start
-
-        return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_tasks)
-
-    @staticmethod
     def _multiprocessing_worker(task_function, iterations, task_id, results_queue=None):
         """Module-level worker for manual multiprocessing."""
         try:
@@ -170,7 +120,57 @@ class AppBackend:
         results = await asyncio.to_thread(sync_run)
         duration = time.time() - start
 
-        return ('Multiprocessing', duration, results), ('Multiprocessing', duration, number_of_tasks)
+        return ('Multiprocessing (manual) ', duration, results), ('Multiprocessing (manual)', duration, number_of_tasks)
+
+    @staticmethod
+    async def run_multiprocessing_executor_approach(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
+        """
+        Multiprocessing approach using ProcessPoolExecutor.
+        :param task_function: the function to execute in parallel
+        :param number_of_iterations: the number of iterations for each task
+        :param number_of_tasks: the number of parallel tasks to run
+        :return: tuple containing results and performance metrics
+
+        Demonstrates:
+        1. Using ProcessPoolExecutor for parallel execution
+        2. Automatic process management
+        """
+        def sync_run():
+            """
+            Wraps blocking multiprocessing operations
+            Needed because multiprocessing is synchronous/blocking
+            :return: list of results from all tasks
+            """
+            results = []
+            ctx = multiprocessing.get_context('spawn')  # Safe for Windows (creates fresh Python processes)
+
+            # 1. Create and start processes
+            with ProcessPoolExecutor(max_workers=number_of_tasks, mp_context=ctx) as executor:
+                """
+                Creates number_tasks Future objects
+                Each Future represents a task running in a separate process
+                Tasks start executing immediately (when workers available)
+                No explicit queue needed - Futures handle result collection internally
+                """
+                futures = [executor.submit(task_function, number_of_iterations) for _ in range(number_of_tasks)]
+
+                # 2. Wait for all processes to complete / 3. Collect results
+                for f in futures:
+                    try:
+                        results.append(f.result())  # Blocks until task completes
+                    except Exception as e:
+                        results.append(e)
+            return results
+
+        start = time.time()
+        """
+        asyncio.to_thread(sync_run): Offloads blocking sync_run() to thread pool
+        Why?: Keeps NiceGUI event loop responsive
+        Alternative without threads: Would block UI during execution"""
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        return ('Multiprocessing (auto)', duration, results), ('Multiprocessing (auto)', duration, number_of_tasks)
 
     async def run_sequential(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Execute the blocking loop in a background thread
