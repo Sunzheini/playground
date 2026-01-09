@@ -128,9 +128,8 @@ class AppBackend:
         """
         Manual multiprocessing approach using multiprocessing.Process directly.
         :param task_function: the function to execute in each process
-        :param number_of_processes: the number of processes to create
         :param number_of_iterations: the number of iterations for each task
-        :param use_queue: whether to use a multiprocessing.Queue for results
+        :param number_of_tasks: the number of parallel tasks to run
         :return: tuple containing results and performance metrics
 
         Demonstrates:
@@ -148,6 +147,8 @@ class AppBackend:
             # 1. Create and start processes
             for process_id in range(number_of_tasks):
                 p = multiprocessing.Process(
+                    # target=task_function, # cannot pass non-picklable functions, so we use a module-level wrapper
+                    # it would work if we didnt use results = await asyncio.to_thread(sync_run), because of niceui!
                     target=AppBackend._multiprocessing_worker,
                     args=(task_function, number_of_iterations, process_id, results_queue)
                 )
