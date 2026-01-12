@@ -24,17 +24,21 @@ def cpu_intensive_task(n: int) -> int:
 
 
 def io_intensive_task(n: int) -> int:
-    """IO-intensive task: simulate API/database calls and file operations."""
-    # Simulate network delay with varying sleep times
-    delay = (n % 100) * 0.0002
-    time.sleep(delay)
+    """IO-intensive task that actually sleeps."""
+    sleep_time = 0.1  # Fixed 100ms sleep for demonstration
 
-    # Simulate file I/O by creating and reading from memory (not actual disk)
-    data = b"x" * 1000  # Simulate reading 1KB of data
-    processed = len(data) * n
+    # Or scale with n but cap it:
+    # sleep_time = min(0.2, 0.00001 * n)  # Max 200ms
 
-    # Another sleep to simulate network response time
-    time.sleep(delay * 0.5)
+    time.sleep(sleep_time)
+
+    # Simulate file/network work
+    data = b"x" * 1000
+    processed = len(data) * (n % 1000)  # modulo for computation
+
+    # Another sleep
+    time.sleep(sleep_time * 0.5)
+
     return processed
 
 
