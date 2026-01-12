@@ -25,8 +25,13 @@ class AppBackend:
 
         This application demonstrates different concurrency approaches in Python:
 
-        **Sequential**: Runs tasks one after another
-
+        **Sequential**: Runs tasks one after another. Slowest for multiple tasks.
+        Visual timeline:
+        Task 1: [======]
+        Task 2:        [======]
+        Task 3:               [======]
+        Task 4:                      [======]
+        # No overlap, no parallelism
 
         **Multiprocessing**: Uses multiple processes (good for CPU-bound tasks)
         Tasks that require true parallel execution without GIL interference 
@@ -72,6 +77,37 @@ class AppBackend:
     #endregion
 
     #region Methods
+    # -----------------------------------------------------------------------------------------
+    # 1. Sequential
+    # -----------------------------------------------------------------------------------------
+    @staticmethod
+    async def run_sequential(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
+        """
+        Run tasks sequentially. Slowest for multiple tasks.
+        :param task_function: The function to execute.
+        :param number_of_iterations: The number of iterations for each task.
+        :param number_of_tasks: The number of tasks to run.
+        :return: tuple containing results and performance metrics
+        """
+        # Execute the blocking loop in a background thread
+        def sync_run():
+            results = []
+            for _ in range(number_of_tasks):
+                try:
+                    results.append(task_function(number_of_iterations))
+                except Exception as e:
+                    results.append(e)
+            return results
+
+        start = time.time()
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        return ('Sequential', duration, results), ('Sequential', duration, number_of_tasks)
+
+    # -----------------------------------------------------------------------------------------
+    # 2. Multiprocessing
+    # -----------------------------------------------------------------------------------------
     @staticmethod
     def _multiprocessing_worker(task_function, iterations, task_id, results_queue=None):
         """Module-level worker for manual multiprocessing."""
@@ -187,9 +223,9 @@ class AppBackend:
     @staticmethod
     async def run_multiprocessing_external_program() -> tuple:
         """
-    Demonstrate running code in a separate process using subprocess.
-    This shows how to start another program from Python.
-    """
+        Demonstrate running code in a separate process using subprocess.
+        This shows how to start another program from Python.
+        """
         def sync_run():
             # Safe command that works on all systems
             if os.name == 'nt':  # Windows
@@ -236,23 +272,9 @@ class AppBackend:
 
         return ('External Process', duration, results), ('External Process', duration, 1)
 
-    async def run_sequential(self, task_function, number_of_iterations: int, number_of_tasks: int):
-        # Execute the blocking loop in a background thread
-        def sync_run():
-            results = []
-            for _ in range(number_of_tasks):
-                try:
-                    results.append(task_function(number_of_iterations))
-                except Exception as e:
-                    results.append(e)
-            return results
-
-        start = time.time()
-        results = await asyncio.to_thread(sync_run)
-        duration = time.time() - start
-
-        return ('Sequential', duration, results), ('Sequential', duration, number_of_tasks)
-
+    # -----------------------------------------------------------------------------------------
+    # 3. Multithreading
+    # -----------------------------------------------------------------------------------------
     async def run_multithreading(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Wrap the synchronous ThreadPool work in a function and run it in a thread
         def sync_run():
