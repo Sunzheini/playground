@@ -148,27 +148,36 @@ class AppBackend:
             processes = []
             results_queue = multiprocessing.Queue()
 
-            # 1. Create and start processes
-            for process_id in range(number_of_tasks):
-                p = multiprocessing.Process(
-                    # target=task_function, # cannot pass non-picklable functions, so we use a module-level wrapper
-                    # it would work if we didnt use results = await asyncio.to_thread(sync_run), because of niceui!
-                    target=AppBackend._multiprocessing_worker,
-                    args=(task_function, number_of_iterations, process_id, results_queue)
-                )
-                p.start()
-                processes.append(p)
+            try:
+                # 1. Create and start processes
+                for process_id in range(number_of_tasks):
+                    p = multiprocessing.Process(
+                        # target=task_function, # cannot pass non-picklable functions, so we use a module-level wrapper
+                        # it would work if we didnt use results = await asyncio.to_thread(sync_run), because of niceui!
+                        target=AppBackend._multiprocessing_worker,
+                        args=(task_function, number_of_iterations, process_id, results_queue)
+                    )
+                    p.start()
+                    processes.append(p)
 
-            # 2. Wait for all processes to complete
-            for p in processes:
-                p.join()
+                # 2. Wait for all processes to complete
+                for p in processes:
+                    p.join()
 
-            # 3. Collect results
-            while not results_queue.empty():
-                task_id, result = results_queue.get()
-                results.append(result)
+                # 3. Collect results
+                while not results_queue.empty():
+                    task_id, result = results_queue.get(timeout=30)
+                    results.append(result)
 
-            return results
+                return results
+
+            finally:
+                # Ensure all processes are terminated
+                for p in processes:
+                    if p.is_alive():
+                        p.terminate()
+                results_queue.close()
+                results_queue.join_thread()
 
         start = time.time()
         results = await asyncio.to_thread(sync_run)
