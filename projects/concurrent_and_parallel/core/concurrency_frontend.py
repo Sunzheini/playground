@@ -24,6 +24,14 @@ class ConcurrencyFrontend:
     def __init__(self, backend):
         self.backend = backend
 
+        self.min_iterations = 1000
+        self.max_iterations = 10000000
+        self.current_iterations = 4000000
+
+        self.min_tasks = 1
+        self.max_tasks = 20
+        self.current_tasks = 4
+
         #region ui elements
         self.task_type = None
         self.iterations = None
@@ -85,19 +93,19 @@ class ConcurrencyFrontend:
 
                             with ui.row().classes('items-center w-full gap-4'):
                                 # Min value display
-                                ui.label('1').classes('text-caption text-grey w-12')
+                                ui.label(str(self.min_iterations)).classes('text-caption text-grey w-12')
 
                                 # Slider
                                 self.iterations = ui.slider(
-                                    min=1, max=100, value=20
+                                    min=self.min_iterations, max=self.max_iterations, value=self.current_iterations
                                 ).classes('flex-grow').on('update:model-value',
                                                           lambda e: number_input.set_value(e.args))
 
                                 # Max value display
-                                ui.label('100').classes('text-caption text-grey w-12')
+                                ui.label(str(self.max_iterations)).classes('text-caption text-grey w-12')
 
                                 number_input = ui.number(
-                                    min=1, max=100, value=20
+                                    min=self.min_iterations, max=self.max_iterations, value=self.current_iterations
                                 ).classes('w-40 ml-36').on('update:model-value',
                                                            lambda e: self.iterations.set_value(e.args))
                     # endregion
@@ -112,20 +120,20 @@ class ConcurrencyFrontend:
 
                             with ui.row().classes('items-center w-full gap-4'):
                                 # Min value display
-                                ui.label('1').classes('text-caption text-grey w-12')
+                                ui.label(str(self.min_tasks)).classes('text-caption text-grey w-12')
 
                                 # Slider
                                 self.num_tasks = ui.slider(
-                                    min=1, max=20, value=5
+                                    min=self.min_tasks, max=self.max_tasks, value=self.current_tasks
                                 ).classes('flex-grow').on('update:model-value',
                                                           lambda e: num_tasks_input.set_value(e.args))
 
                                 # Max value display
-                                ui.label('20').classes('text-caption text-grey w-12')
+                                ui.label(str(self.max_tasks)).classes('text-caption text-grey w-12')
 
                                 # Number input for precise control
                                 num_tasks_input = ui.number(
-                                    min=1, max=20, value=5
+                                    min=self.min_tasks, max=self.max_tasks, value=self.current_tasks
                                 ).classes('w-40 ml-36').on('update:model-value',
                                                            lambda e: self.num_tasks.set_value(e.args))
                     # endregion

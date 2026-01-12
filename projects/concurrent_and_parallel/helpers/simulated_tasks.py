@@ -6,12 +6,20 @@ import time
 
 
 def cpu_intensive_task(n: int) -> int:
-    """CPU-intensive task: calculate sum of squares (computationally heavy)."""
+    """Heavy CPU task."""
     result = 0
     for i in range(n):
         result += i * i
-    for i in range(n // 100):
-        result = (result * i) % (n + 1)
+        result = (result * 997) % (n + 1)  # Extra computation
+        result ^= i  # Bitwise operation
+        result = result // 7 if result % 7 == 0 else result * 3
+
+    # Add another heavy loop
+    for i in range(n // 10):
+        for j in range(10):
+            result += (i * j) ** 0.5
+            result = result % 1000007
+
     return result
 
 
@@ -31,17 +39,19 @@ def io_intensive_task(n: int) -> int:
 
 
 def mixed_task(n: int) -> int:
-    """Mixed CPU + IO task: demonstrates both types of operations."""
-    # CPU phase: some computation
-    cpu_result = 0
-    for i in range(n // 10):
-        cpu_result += i ** 1.5
+    """Properly scaled mixed task."""
+    result = 0
 
-    # IO phase: simulate waiting
-    time.sleep(max(0.001, (n % 50) * 0.0001))
+    cpu_work = n // 10  # 400k iterations for n=4M
+    for i in range(cpu_work):
+        result += i * i * i
 
-    # Again CPU work
-    for i in range(n // 20):
-        cpu_result = (cpu_result + i) % 1000
+    # IO: Meaningful sleep
+    sleep_time = min(0.5, n / 10000000)  # Up to 0.5s for large n
+    time.sleep(sleep_time)
 
-    return cpu_result
+    # More CPU
+    for i in range(cpu_work // 2):
+        result = (result * 13 + i) % 1000000
+
+    return result
