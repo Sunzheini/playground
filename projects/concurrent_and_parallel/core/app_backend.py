@@ -43,10 +43,10 @@ class AppBackend:
         More memory and setup overhead than threads or asyncio.
         
         Process Pool Benefits:
-        1. Process Reuse**: Creating processes is expensive. Pools reuse them.
-        2. Load Balancing**: Tasks automatically distributed to available workers.
-        3. Resource Management**: Automatic cleanup with context manager.
-        4. Queue Management**: Internal result collection (no manual Queue needed).
+        1. Process Reuse: Creating processes is expensive. Pools reuse them.
+        2. Load Balancing: Tasks automatically distributed to available workers.
+        3. Resource Management: Automatic cleanup with context manager.
+        4. Queue Management: Internal result collection (no manual Queue needed).
         
         Running External Programs:
         1. Python can start external programs using the 'subprocess' module.
@@ -61,6 +61,12 @@ class AppBackend:
         - CPU Intensive: e.g. Calculations, Data processing
         - IO Intensive: e.g. File operations, Network requests
         - Mixed: Combination of both
+        
+        **Notes**:
+        # Creating processes/threads has cost:
+        Process creation: ~0.1s overhead
+        Thread creation: ~0.01s overhead
+        # If tasks are very short, overhead dominates
 
         Adjust the sliders to see how different parameters affect performance!
         '''
