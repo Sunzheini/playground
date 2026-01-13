@@ -53,7 +53,14 @@ class AppBackend:
         2. This creates a completely separate process with its own memory space.
 
         **Threading**: Uses multiple threads (good for I/O-bound tasks)
-
+        I/O-bound tasks that use blocking libraries (not async-friendly)
+        GUI responsiveness
+        Tasks where you want real OS threads
+⏳ 
+        Multiple threads share same memory space
+        Subject to GIL (Global Interpreter Lock) in CPython:
+        Only one thread executes Python bytecode at a time
+        Still useful for I/O waits, but not CPU-bound parallelism
 
         **Asyncio**: Uses async/await for concurrent I/O operations
 
