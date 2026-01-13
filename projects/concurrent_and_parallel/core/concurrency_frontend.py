@@ -144,7 +144,7 @@ class ConcurrencyFrontend:
                               color='secondary').classes('flex-1')
                     ui.button('Multiprocessing (manual)', on_click=self.run_multiprocessing_manual,
                               color='secondary').classes('flex-1')
-                    ui.button('Threading', on_click=self.run_multithreading,
+                    ui.button('Multithreading (manual)', on_click=self.run_multithreading_manual,
                               color='secondary').classes('flex-1')
                     ui.button('Asyncio', on_click=self.run_asyncio,
                               color='secondary').classes('flex-1')
@@ -154,7 +154,7 @@ class ConcurrencyFrontend:
                               color='secondary').classes('flex-1')
                     ui.button('Multiprocessing (auto)', on_click=self.run_multiprocessing_auto,
                               color='secondary').classes('flex-1')
-                    ui.button('',
+                    ui.button('Multithreading (auto)', on_click=self.run_multithreading_auto,
                               color='secondary').classes('flex-1')
                     ui.button('',
                               color='secondary').classes('flex-1')
@@ -164,7 +164,7 @@ class ConcurrencyFrontend:
                               color='secondary').classes('flex-1')
                     ui.button('Multipr. (external program)', on_click=self.run_multiprocessing_another_program,
                               color='secondary').classes('flex-1')
-                    ui.button('',
+                    ui.button('Try thread restart', on_click=self.run_multithreading_try_restart,
                               color='secondary').classes('flex-1')
                     ui.button('',
                               color='secondary').classes('flex-1')
@@ -261,6 +261,22 @@ class ConcurrencyFrontend:
     #endregion
 
     #region Concurrency Methods
+    async def run_sequential(self):
+        """Run tasks sequentially but offload the actual computation to a thread.
+
+        This keeps the UI responsive while the CPU/IO work executes in a background
+        thread via asyncio.to_thread.
+        """
+        self.start_execution('Sequential')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.run_sequential(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
     async def run_multiprocessing_manual(self) -> None:
         """Run tasks manually using multiprocessing.Process and Queue safely on Windows.
         Uses module-level functions (picklable) and spawn context to avoid Windows issues.
@@ -296,30 +312,41 @@ class ConcurrencyFrontend:
         self.show_results(*results)
         self.add_to_history(*history)
 
-    async def run_sequential(self):
-        """Run tasks sequentially but offload the actual computation to a thread.
-
-        This keeps the UI responsive while the CPU/IO work executes in a background
-        thread via asyncio.to_thread.
+    async def run_multithreading_manual(self) -> None:
         """
-        self.start_execution('Sequential')
+        Run tasks manually using threading.Thread.
+        :return: None
+        """
+        self.start_execution('Threading')
         task_func = self.get_task_function()
         num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        results, history = await self.backend.run_sequential(task_func, num_iterations, num_tasks)
+        results, history = await self.backend.run_multithreading_manual_approach(task_func, num_iterations, num_tasks)
 
         self.show_results(*results)
         self.add_to_history(*history)
 
-    async def run_multithreading(self):
+    async def run_multithreading_auto(self) -> None:
         """Run tasks using ThreadPoolExecutor without blocking the event loop."""
         self.start_execution('Threading')
         task_func = self.get_task_function()
         num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        results, history = await self.backend.run_multithreading(task_func, num_iterations, num_tasks)
+        results, history = await self.backend.run_multithreading_executor_approach(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_multithreading_try_restart(self) -> None:
+        """Is it possible to start already finished Thread object once again?"""
+        self.start_execution('Threading with Restart')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.demonstrate_thread_reuse(task_func, num_iterations, num_tasks)
 
         self.show_results(*results)
         self.add_to_history(*history)

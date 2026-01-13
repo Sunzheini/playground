@@ -5,6 +5,7 @@ import asyncio
 import multiprocessing
 import os
 import subprocess
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
@@ -297,7 +298,71 @@ class AppBackend:
     # -----------------------------------------------------------------------------------------
     # 3. Multithreading
     # -----------------------------------------------------------------------------------------
-    async def run_multithreading(self, task_function, number_of_iterations: int, number_of_tasks: int):
+    @staticmethod
+    def _multithreading_worker(task_function, iterations, task_id, results_queue=None):
+        """Module-level worker for manual multithreading."""
+        try:
+            result = task_function(iterations)
+            if results_queue is not None:
+                results_queue.put((task_id, result))
+            return result
+        except Exception as e:
+            if results_queue is not None:
+                results_queue.put((task_id, e))
+            return e
+
+    @staticmethod
+    async def run_multithreading_manual_approach(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
+        """
+        Manual multithreading approach using threading.Thread directly.
+        :param task_function: the function to execute
+        :param number_of_iterations: the number of iterations for each task
+        :param number_of_tasks: the number of parallel tasks to run
+        :return: tuple containing results and performance metrics
+        """
+        def sync_run():
+            """Wrap the synchronous Thread work in a function and run it in a thread"""
+            results = []
+            threads = []
+
+            try:
+                # 1. Create and start threads
+                for thread_id in range(number_of_tasks):
+                    thread = threading.Thread(
+                        target=AppBackend._multithreading_worker,
+                        args=(task_function, number_of_iterations, thread_id, None)
+                    )
+
+                    thread.start()
+                    threads.append(thread)
+
+                # 2. Wait for all threads to complete
+                for thread in threads:
+                    thread.join()
+
+                # 3. Collect results
+                for thread in threads:
+                    if thread.exception is not None:
+                        results.append(thread.exception)
+                    else:
+                        results.append(thread.result)
+
+                return results
+
+            finally:
+                # Ensure all threads are cleaned up
+                for thread in threads:
+                    if thread.is_alive():
+                        thread.join()
+
+        start = time.time()
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        return ('Threading (manual)', duration, results), ('Threading (manual)', duration, number_of_tasks)
+
+    @staticmethod
+    async def run_multithreading_executor_approach(task_function, number_of_iterations: int, number_of_tasks: int):
         # Wrap the synchronous ThreadPool work in a function and run it in a thread
         def sync_run():
             results = []
@@ -315,6 +380,27 @@ class AppBackend:
         duration = time.time() - start
 
         return ('Threading', duration, results), ('Threading', duration, number_of_tasks)
+
+    @staticmethod
+    async def demonstrate_thread_reuse():
+        """Show that threads cannot be restarted."""
+        import threading
+
+        def worker():
+            print(f"Thread {threading.current_thread().name} running")
+            time.sleep(0.1)
+
+        # Create and start thread
+        thread = threading.Thread(target=worker, name="TestThread")
+        thread.start()
+        thread.join()
+
+        # Try to restart (will fail)
+        try:
+            thread.start()  # Raises RuntimeError
+            return "Thread CAN be restarted (WRONG!)"
+        except RuntimeError as e:
+            return f"Thread CANNOT be restarted: {e}"
 
     async def run_asyncio(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Build coroutines that call the sync function in a thread

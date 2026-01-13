@@ -30,7 +30,8 @@ def study():
     print("Study")
 
 
-x = threading.Thread(target=eat_breakfast, args=())    # daemon=True means it will not block the main thread from exiting
+x = threading.Thread(target=eat_breakfast, args=())    # daemon=True means it will not
+# block the main thread from exiting
 x.start()
 
 y = threading.Thread(target=drink_coffee, args=())
