@@ -168,6 +168,16 @@ class ConcurrencyFrontend:
                               color='secondary').classes('flex-1')
                     ui.button('',
                               color='secondary').classes('flex-1')
+
+                with ui.row().classes('w-full space-x-2'):
+                    ui.button('',
+                              color='secondary').classes('flex-1')
+                    ui.button('',
+                              color='secondary').classes('flex-1')
+                    ui.button('Show thread state', on_click=self.run_multithreading_show_state,
+                              color='secondary').classes('flex-1')
+                    ui.button('',
+                              color='secondary').classes('flex-1')
                 #endregion
 
                 #region  Results display
@@ -347,6 +357,18 @@ class ConcurrencyFrontend:
         num_tasks = int(self.num_tasks.value)
 
         results, history = await self.backend.demonstrate_thread_reuse(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_multithreading_show_state(self) -> None:
+        """Show the state of threads during execution."""
+        self.start_execution('Threading with State Display')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.demonstrate_thread_states(task_func, num_iterations, num_tasks)
 
         self.show_results(*results)
         self.add_to_history(*history)

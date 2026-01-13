@@ -362,15 +362,31 @@ class AppBackend:
         return ('Threading (manual)', duration, results), ('Threading (manual)', duration, number_of_tasks)
 
     @staticmethod
-    async def run_multithreading_executor_approach(task_function, number_of_iterations: int, number_of_tasks: int):
-        # Wrap the synchronous ThreadPool work in a function and run it in a thread
+    async def run_multithreading_executor_approach(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
+        """
+        Multithreading approach using ThreadPoolExecutor.
+        1. Uses ThreadPoolExecutor for managing threads
+        2. Automatic thread lifecycle management
+        3. Simplified concurrent execution
+        4. Suitable for I/O-bound tasks
+        5. Subject to GIL limitations for CPU-bound tasks
+
+        :param task_function: The function to execute
+        :param number_of_iterations: The number of iterations for each task
+        :param number_of_tasks: The number of parallel tasks to run
+        :return: tuple containing results and performance metrics
+        """
         def sync_run():
             results = []
+
+            # 1. Create and start processes
             with ThreadPoolExecutor(max_workers=number_of_tasks) as executor:
                 futures = [executor.submit(task_function, number_of_iterations) for _ in range(number_of_tasks)]
+
+                # 2. Wait for all processes to complete / 3. Collect results
                 for f in futures:
                     try:
-                        results.append(f.result())
+                        results.append(f.result())  # Blocks until task completes
                     except Exception as e:
                         results.append(e)
             return results
@@ -402,6 +418,33 @@ class AppBackend:
         except RuntimeError as e:
             return f"Thread CANNOT be restarted: {e}"
 
+    @staticmethod
+    async def demonstrate_thread_states():
+        """Show thread states during lifecycle."""
+        import threading
+
+        states_info = []
+
+        def worker():
+            time.sleep(0.5)
+
+        thread = threading.Thread(target=worker, name="StateDemo")
+
+        # Initial state
+        states_info.append(f"Created: {thread.is_alive()} (alive={thread.is_alive()})")
+
+        thread.start()
+        time.sleep(0.1)
+        states_info.append(f"Running: {thread.is_alive()} (alive={thread.is_alive()})")
+
+        thread.join()
+        states_info.append(f"Finished: {thread.is_alive()} (alive={thread.is_alive()})")
+
+        return states_info
+
+    # -----------------------------------------------------------------------------------------
+    # 4. Asyncio
+    # -----------------------------------------------------------------------------------------
     async def run_asyncio(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Build coroutines that call the sync function in a thread
         async def async_task():
