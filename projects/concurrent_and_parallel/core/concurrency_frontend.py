@@ -1,15 +1,9 @@
 """
 Frontend for demonstrating Python concurrency methods using NiceGUI.
 """
-import os
 import time
 from datetime import datetime
-import multiprocessing
-import threading
-import asyncio
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
-import psutil
 from nicegui import ui
 
 from projects.concurrent_and_parallel.helpers.simulated_tasks import cpu_intensive_task, io_intensive_task, mixed_task
@@ -26,11 +20,13 @@ class ConcurrencyFrontend:
 
         self.min_iterations = 1000
         self.max_iterations = 10000000
-        self.current_iterations = 4000000
+        # self.current_iterations = 4000000
+        self.current_iterations = 1000
 
         self.min_tasks = 1
         self.max_tasks = 20
-        self.current_tasks = 4
+        # self.current_tasks = 4
+        self.current_tasks = 20
 
         #region ui elements
         self.task_type = None
@@ -144,39 +140,29 @@ class ConcurrencyFrontend:
                               color='secondary').classes('flex-1')
                     ui.button('Multiprocessing (manual)', on_click=self.run_multiprocessing_manual,
                               color='secondary').classes('flex-1')
-                    ui.button('Multithreading (manual)', on_click=self.run_multithreading_manual,
-                              color='secondary').classes('flex-1')
-                    ui.button('Asyncio', on_click=self.run_asyncio,
-                              color='secondary').classes('flex-1')
-
-                with ui.row().classes('w-full space-x-2'):
-                    ui.button('',
-                              color='secondary').classes('flex-1')
                     ui.button('Multiprocessing (auto)', on_click=self.run_multiprocessing_auto,
-                              color='secondary').classes('flex-1')
-                    ui.button('Multithreading (auto)', on_click=self.run_multithreading_auto,
-                              color='secondary').classes('flex-1')
-                    ui.button('',
-                              color='secondary').classes('flex-1')
-
-                with ui.row().classes('w-full space-x-2'):
-                    ui.button('',
                               color='secondary').classes('flex-1')
                     ui.button('Multipr. (external program)', on_click=self.run_multiprocessing_another_program,
                               color='secondary').classes('flex-1')
+
+                with ui.row().classes('w-full space-x-2'):
+                    ui.button('Multithreading (auto)', on_click=self.run_multithreading_auto,
+                              color='secondary').classes('flex-1')
+                    ui.button('Multithreading (manual)', on_click=self.run_multithreading_manual,
+                              color='secondary').classes('flex-1')
                     ui.button('Try thread restart', on_click=self.run_multithreading_try_restart,
                               color='secondary').classes('flex-1')
-                    ui.button('',
+                    ui.button('Show state', on_click=self.run_multithreading_show_state,
                               color='secondary').classes('flex-1')
 
                 with ui.row().classes('w-full space-x-2'):
-                    ui.button('',
+                    ui.button('Try sync', on_click=self.run_multithreading_show_synchronization,
+                              color='secondary').classes('flex-1')
+                    ui.button('Try gil limit', on_click=self.run_multithreading_show_gil_limitation,
                               color='secondary').classes('flex-1')
                     ui.button('',
                               color='secondary').classes('flex-1')
-                    ui.button('Show thread state', on_click=self.run_multithreading_show_state,
-                              color='secondary').classes('flex-1')
-                    ui.button('',
+                    ui.button('Asyncio', on_click=self.run_asyncio,
                               color='secondary').classes('flex-1')
                 #endregion
 
@@ -352,26 +338,34 @@ class ConcurrencyFrontend:
     async def run_multithreading_try_restart(self) -> None:
         """Is it possible to start already finished Thread object once again?"""
         self.start_execution('Threading with Restart')
-        task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
 
-        results, history = await self.backend.demonstrate_thread_reuse(task_func, num_iterations, num_tasks)
+        results, duration = await self.backend.demonstrate_thread_reuse()
 
-        self.show_results(*results)
-        self.add_to_history(*history)
+        self.results_label.set_text(f'Thread Restart Demo:\n{chr(10).join(results)}')
 
     async def run_multithreading_show_state(self) -> None:
         """Show the state of threads during execution."""
         self.start_execution('Threading with State Display')
-        task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
 
-        results, history = await self.backend.demonstrate_thread_states(task_func, num_iterations, num_tasks)
+        results, duration = await self.backend.demonstrate_thread_states()
 
-        self.show_results(*results)
-        self.add_to_history(*history)
+        self.results_label.set_text(f'Thread States:\n{chr(10).join(results)}')
+
+    async def run_multithreading_show_synchronization(self) -> None:
+        """Demonstrate thread synchronization using locks."""
+        self.start_execution('Threading with Synchronization')
+
+        results, duration = await self.backend.demonstrate_thread_synchronization()
+
+        self.results_label.set_text(f'Thread Synchronization:\n{chr(10).join(results)}')
+
+    async def run_multithreading_show_gil_limitation(self) -> None:
+        """Demonstrate GIL limitations with CPU-bound tasks."""
+        self.start_execution('Threading GIL Limitation Demo')
+
+        results, duration = await self.backend.demonstrate_gil_limitation()
+
+        self.results_label.set_text(f'GIL Limitation Demo:\n{chr(10).join(results)}')
 
     async def run_asyncio(self):
         """Run tasks using asyncio by offloading blocking calls to threads with asyncio.to_thread."""

@@ -299,17 +299,15 @@ class AppBackend:
     # 3. Multithreading
     # -----------------------------------------------------------------------------------------
     @staticmethod
-    def _multithreading_worker(task_function, iterations, task_id, results_queue=None):
+    def _multithreading_worker(task_function, iterations, task_id, results, results_lock):
         """Module-level worker for manual multithreading."""
         try:
             result = task_function(iterations)
-            if results_queue is not None:
-                results_queue.put((task_id, result))
-            return result
+            with results_lock:
+                results.append((task_id, result))
         except Exception as e:
-            if results_queue is not None:
-                results_queue.put((task_id, e))
-            return e
+            with results_lock:
+                results.append((task_id, e))
 
     @staticmethod
     async def run_multithreading_manual_approach(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
@@ -325,12 +323,14 @@ class AppBackend:
             results = []
             threads = []
 
+            results_lock = threading.Lock()     # To protect shared results list
+
             try:
                 # 1. Create and start threads
                 for thread_id in range(number_of_tasks):
                     thread = threading.Thread(
                         target=AppBackend._multithreading_worker,
-                        args=(task_function, number_of_iterations, thread_id, None)
+                        args=(task_function, number_of_iterations, thread_id, results, results_lock)
                     )
 
                     thread.start()
@@ -341,13 +341,8 @@ class AppBackend:
                     thread.join()
 
                 # 3. Collect results
-                for thread in threads:
-                    if thread.exception is not None:
-                        results.append(thread.exception)
-                    else:
-                        results.append(thread.result)
-
-                return results
+                results.sort(key=lambda x: x[0])    # Sort by worker_id and extract results
+                return [r[1] for r in results]
 
             finally:
                 # Ensure all threads are cleaned up
@@ -400,8 +395,6 @@ class AppBackend:
     @staticmethod
     async def demonstrate_thread_reuse():
         """Show that threads cannot be restarted."""
-        import threading
-
         def worker():
             print(f"Thread {threading.current_thread().name} running")
             time.sleep(0.1)
@@ -414,15 +407,13 @@ class AppBackend:
         # Try to restart (will fail)
         try:
             thread.start()  # Raises RuntimeError
-            return "Thread CAN be restarted (WRONG!)"
+            return ["Thread CAN be restarted (WRONG!)"], 0.0
         except RuntimeError as e:
-            return f"Thread CANNOT be restarted: {e}"
+            return [f"Thread CANNOT be restarted: {e}"], 0.0
 
     @staticmethod
     async def demonstrate_thread_states():
         """Show thread states during lifecycle."""
-        import threading
-
         states_info = []
 
         def worker():
@@ -434,13 +425,102 @@ class AppBackend:
         states_info.append(f"Created: {thread.is_alive()} (alive={thread.is_alive()})")
 
         thread.start()
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
         states_info.append(f"Running: {thread.is_alive()} (alive={thread.is_alive()})")
 
         thread.join()
         states_info.append(f"Finished: {thread.is_alive()} (alive={thread.is_alive()})")
 
-        return states_info
+        return states_info, 0.0
+
+    @staticmethod
+    async def demonstrate_thread_synchronization():
+        """Show race condition and lock solution."""
+
+        def sync_run():
+            results = []
+
+            # Without lock (race condition)
+            counter = 0
+
+            def increment():
+                nonlocal counter
+                for _ in range(1000):
+                    counter += 1
+
+            threads = []
+            for _ in range(10):
+                t = threading.Thread(target=increment)
+                t.start()
+                threads.append(t)
+
+            for t in threads:
+                t.join()
+
+            results.append(f"Without lock: {counter} (expected 10000)")
+
+            # With lock
+            counter = 0
+            lock = threading.Lock()
+
+            def increment_safe():
+                nonlocal counter
+                for _ in range(1000):
+                    with lock:
+                        counter += 1
+
+            threads = []
+            for _ in range(10):
+                t = threading.Thread(target=increment_safe)
+                t.start()
+                threads.append(t)
+
+            for t in threads:
+                t.join()
+
+            results.append(f"With lock: {counter} (expected 10000)")
+            return results, 0.0
+
+        return await asyncio.to_thread(sync_run)
+
+    @staticmethod
+    async def demonstrate_gil_limitation():
+        """Show that threading doesn't help CPU-bound tasks."""
+
+        def sync_run():
+            def cpu_worker(n):
+                result = 0
+                for i in range(n):
+                    result += i * i
+                return result
+
+            n = 10000000  # 10 million iterations
+
+            # Sequential
+            start = time.time()
+            for _ in range(4):
+                cpu_worker(n)
+            seq_time = time.time() - start
+
+            # Threaded
+            start = time.time()
+            threads = []
+            for _ in range(4):
+                t = threading.Thread(target=cpu_worker, args=(n,))
+                t.start()
+                threads.append(t)
+
+            for t in threads:
+                t.join()
+            thread_time = time.time() - start
+
+            return [
+                f"Sequential (1 thread): {seq_time:.2f}s",
+                f"Threaded (4 threads): {thread_time:.2f}s",
+                f"Speedup: {seq_time / thread_time:.2f}x (GIL limited!)"
+            ], 0.0
+
+        return await asyncio.to_thread(sync_run)
 
     # -----------------------------------------------------------------------------------------
     # 4. Asyncio
