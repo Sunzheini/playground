@@ -64,6 +64,15 @@ class AppBackend:
         Still useful for I/O waits, but not CPU-bound parallelism
 
         **Asyncio**: Uses async/await for concurrent I/O operations
+        I/O-bound tasks
+        Network requests (HTTP, sockets)
+        File I/O (especially async libraries)
+        Database queries (async drivers)
+        Lots of concurrent tasks that mostly wait (not compute)
+
+        Single-threaded, event-loop-based concurrency: We have 1 process and 1 thread!
+        Uses coroutines (async def) and await to yield control while waiting
+        Very lightweight: thousands of tasks can run concurrently
 
         **Task Types:**
         - CPU Intensive: e.g. Calculations, Data processing
@@ -90,10 +99,7 @@ class AppBackend:
         return f"{num_cores}"
     #endregion
 
-    #region Methods
-    # -----------------------------------------------------------------------------------------
-    # 1. Sequential
-    # -----------------------------------------------------------------------------------------
+    # region 1. Sequential
     @staticmethod
     async def run_sequential(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
         """
@@ -118,10 +124,9 @@ class AppBackend:
         duration = time.time() - start
 
         return ('Sequential', duration, results), ('Sequential', duration, number_of_tasks)
+    # endregion
 
-    # -----------------------------------------------------------------------------------------
-    # 2. Multiprocessing
-    # -----------------------------------------------------------------------------------------
+    # region 2. Multiprocessing
     @staticmethod
     def _multiprocessing_worker(task_function, iterations, task_id, results_queue=None):
         """Module-level worker for manual multiprocessing."""
@@ -294,10 +299,9 @@ class AppBackend:
             ]
 
         return ('External Process', duration, results), ('External Process', duration, 1)
+    #endregion
 
-    # -----------------------------------------------------------------------------------------
-    # 3. Multithreading
-    # -----------------------------------------------------------------------------------------
+    #region 3. Multithreading
     @staticmethod
     def _multithreading_worker(task_function, iterations, task_id, results, results_lock):
         """Module-level worker for manual multithreading."""
@@ -521,10 +525,9 @@ class AppBackend:
             ], 0.0
 
         return await asyncio.to_thread(sync_run)
+    #endregion
 
-    # -----------------------------------------------------------------------------------------
-    # 4. Asyncio
-    # -----------------------------------------------------------------------------------------
+    # region 4. Asyncio
     async def run_asyncio(self, task_function, number_of_iterations: int, number_of_tasks: int):
         # Build coroutines that call the sync function in a thread
         async def async_task():
