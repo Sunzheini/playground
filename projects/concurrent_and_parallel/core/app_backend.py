@@ -2,12 +2,14 @@
 Module: app_backend
 """
 import asyncio
+import aiohttp
 import multiprocessing
 import os
 import subprocess
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from asyncio import get_event_loop, sleep, gather, wait, new_event_loop, set_event_loop, create_task, run
 
 
 class AppBackend:
@@ -528,7 +530,8 @@ class AppBackend:
     #endregion
 
     # region 4. Asyncio
-    async def run_asyncio(self, task_function, number_of_iterations: int, number_of_tasks: int):
+    @staticmethod
+    async def run_asyncio(task_function, number_of_iterations: int, number_of_tasks: int):
         # Build coroutines that call the sync function in a thread
         async def async_task():
             return await asyncio.to_thread(task_function, number_of_iterations)
