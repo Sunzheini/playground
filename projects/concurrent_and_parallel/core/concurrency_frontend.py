@@ -374,7 +374,7 @@ class ConcurrencyFrontend:
         num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
-        results, history = await self.backend.run_asyncio(task_func, num_iterations, num_tasks)
+        results, history = await self.backend.run_asyncio_manually(task_func, num_iterations, num_tasks)
 
         self.show_results(*results)
         self.add_to_history(*history)

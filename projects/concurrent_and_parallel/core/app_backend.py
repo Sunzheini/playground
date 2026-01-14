@@ -9,7 +9,7 @@ import subprocess
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-from asyncio import get_event_loop, sleep, gather, wait, new_event_loop, set_event_loop, create_task, run
+from asyncio import get_event_loop, gather, wait, new_event_loop, set_event_loop, create_task, run
 
 
 class AppBackend:
@@ -531,15 +531,54 @@ class AppBackend:
 
     # region 4. Asyncio
     @staticmethod
-    async def run_asyncio(task_function, number_of_iterations: int, number_of_tasks: int):
-        # Build coroutines that call the sync function in a thread
-        async def async_task():
-            return await asyncio.to_thread(task_function, number_of_iterations)
+    async def run_asyncio_manually(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
+        """
+        Manual asyncio approach using asyncio.to_thread.
+
+        Info:
+        - async keyword specifies that this is a coroutine
+        - asyncio.create_task() schedules coroutine on event loop
+        - asyncio.gather(tasks) waits for multiple tasks concurrently
+        """
+        async def async_task_function_wrapper(iterations):
+            """Wrap the sync task to run in thread pool."""
+            return await asyncio.to_thread(task_function, iterations)
+
+        def sync_run():
+            """
+            Runs asyncio code in a separate thread.
+            This keeps the UI responsive while demonstrating asyncio concepts.
+            """
+            tasks = []
+
+            # create a new event loop every time, instead of get_running_loop()
+            loop = new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            try:
+                # 1. Create and start tasks
+                for _ in range(number_of_tasks):
+                    # Create a task from the coroutine
+                    task = loop.create_task(async_task_function_wrapper(number_of_iterations))
+                    tasks.append(task)
+
+                # 2. Run the event loop until all tasks complete
+                # asyncio.gather() returns a coroutine that needs to be awaited
+                gather_coroutine = asyncio.gather(*tasks, return_exceptions=True)
+
+                # 3. Run the event loop to completion and collect results
+                results = list(loop.run_until_complete(gather_coroutine))
+
+                return results
+
+            finally:
+                # Clean up the event loop
+                if not loop.is_closed():
+                    loop.close()
 
         start = time.time()
-        tasks = [async_task() for _ in range(number_of_tasks)]
-        results = await asyncio.gather(*tasks)
+        results = await asyncio.to_thread(sync_run)
         duration = time.time() - start
 
-        return ('Asyncio', duration, results), ('Asyncio', duration, number_of_tasks)
+        return ('Asyncio (manual) ', duration, results), ('Asyncio (manual)', duration, number_of_tasks)
     #endregion
