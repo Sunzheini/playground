@@ -581,4 +581,39 @@ class AppBackend:
         duration = time.time() - start
 
         return ('Asyncio (manual) ', duration, results), ('Asyncio (manual)', duration, number_of_tasks)
+
+    @staticmethod
+    async def run_asyncio_auto(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
+        """
+        Simplified manual asyncio approach using asyncio.run().
+
+        Demonstrates:
+        1. asyncio.run() - creates and runs event loop automatically
+        2. asyncio.gather() - concurrent execution of tasks
+        3. Clean, modern asyncio pattern
+        """
+        async def async_task_function_wrapper(iterations):
+            """Wrap the sync task to run in thread pool."""
+            return await asyncio.to_thread(task_function, iterations)
+
+        def sync_run():
+            """
+            Run async code in a thread using asyncio.run().
+            This keeps the UI responsive while demonstrating asyncio concepts.
+            """
+            # 1. Create list of coroutines
+            async def main():
+                tasks = [async_task_function_wrapper(number_of_iterations) for _ in range(number_of_tasks)]
+
+                # 2. Run all tasks concurrently and 3. collect results
+                return await asyncio.gather(*tasks, return_exceptions=True)
+
+            # asyncio.run() handles event loop creation/cleanup automatically
+            return asyncio.run(main())
+
+        start = time.time()
+        results = await asyncio.to_thread(sync_run)
+        duration = time.time() - start
+
+        return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
     #endregion

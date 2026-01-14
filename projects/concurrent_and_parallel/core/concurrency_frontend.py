@@ -160,9 +160,9 @@ class ConcurrencyFrontend:
                               color='secondary').classes('flex-1')
                     ui.button('Try gil limit', on_click=self.run_multithreading_show_gil_limitation,
                               color='secondary').classes('flex-1')
-                    ui.button('',
+                    ui.button('Asyncio (Manual)', on_click=self.run_asyncio_manual,
                               color='secondary').classes('flex-1')
-                    ui.button('Asyncio', on_click=self.run_asyncio,
+                    ui.button('Asyncio (Auto)', on_click=self.run_asyncio_auto,
                               color='secondary').classes('flex-1')
                 #endregion
 
@@ -367,14 +367,26 @@ class ConcurrencyFrontend:
 
         self.results_label.set_text(f'GIL Limitation Demo:\n{chr(10).join(results)}')
 
-    async def run_asyncio(self):
-        """Run tasks using asyncio by offloading blocking calls to threads with asyncio.to_thread."""
+    async def run_asyncio_manual(self):
+        """Run tasks using asyncio with manual event loop management."""
         self.start_execution('Asyncio')
         task_func = self.get_task_function()
         num_iterations = int(self.iterations.value)
         num_tasks = int(self.num_tasks.value)
 
         results, history = await self.backend.run_asyncio_manually(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_asyncio_auto(self) -> None:
+        """Run tasks using asyncio with asyncio.run()."""
+        self.start_execution('Asyncio')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
 
         self.show_results(*results)
         self.add_to_history(*history)
