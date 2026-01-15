@@ -2,6 +2,8 @@
 Module: app_backend
 """
 import asyncio
+import sys
+
 import aiohttp
 import multiprocessing
 import os
@@ -28,6 +30,7 @@ class AppBackend:
 
         This application demonstrates different concurrency approaches in Python:
 
+
         **Sequential**: Runs tasks one after another. Slowest for multiple tasks.
         Visual timeline:
         Task 1: [======]
@@ -35,6 +38,7 @@ class AppBackend:
         Task 3:               [======]
         Task 4:                      [======]
         # No overlap, no parallelism
+
 
         **Multiprocessing**: Uses multiple processes (good for CPU-bound tasks)
         Tasks that require true parallel execution without GIL interference 
@@ -55,6 +59,7 @@ class AppBackend:
         1. Python can start external programs using the 'subprocess' module.
         2. This creates a completely separate process with its own memory space.
 
+
         **Threading**: Uses multiple threads (good for I/O-bound tasks)
         I/O-bound tasks that use blocking libraries (not async-friendly)
         GUI responsiveness
@@ -64,6 +69,7 @@ class AppBackend:
         Subject to GIL (Global Interpreter Lock) in CPython:
         Only one thread executes Python bytecode at a time
         Still useful for I/O waits, but not CPU-bound parallelism
+
 
         **Asyncio**: Uses async/await for concurrent I/O operations
         I/O-bound tasks
@@ -75,6 +81,20 @@ class AppBackend:
         Single-threaded, event-loop-based concurrency: We have 1 process and 1 thread!
         Uses coroutines (async def) and await to yield control while waiting
         Very lightweight: thousands of tasks can run concurrently
+        
+        --- When to use asyncio.run, create_task, to_thread ---
+        Use asyncio.run(coro) to start the event loop and run a top-level coroutine.
+          - Typical for scripts, main entry points, or testing async code.
+          - Only call once per program (it creates and closes the event loop).
+    
+        Use asyncio.create_task(coro) to schedule a coroutine to run concurrently in the background.
+          - Only use inside an already running event loop (i.e., inside async functions).
+          - Lets you start multiple async tasks and await them later (e.g., with asyncio.gather).
+        
+        Use asyncio.to_thread(func, *args) to run blocking (sync) code in a separate thread from async code.
+          - Useful for file I/O, CPU-bound, or legacy sync functions that would block the event loop.
+          - Returns a coroutine you can await in async code.
+
 
         **Task Types:**
         - CPU Intensive: e.g. Calculations, Data processing
@@ -616,4 +636,71 @@ class AppBackend:
         duration = time.time() - start
 
         return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
+
+    @staticmethod
+    async def run_asyncio_with_aiohttp(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
+        """
+        Asyncio approach using aiohttp for true async I/O
+        operations for network-bound tasks, e.g. HTTP requests.
+
+        We will not used the task_function parameter here
+        """
+        async def get_async_url_response(session, url):
+            """
+            Fetch a URL asynchronously using aiohttp.
+            :param session: The aiohttp client session.
+            :param url: The URL to fetch.
+            :return: The response text.
+            """
+            try:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=3)) as response:
+                    return await response.text()
+            except asyncio.TimeoutError:
+                print(f"Timeout fetching {url}")
+                return ""
+            except Exception as e:
+                print(f"⚠Error fetching {url}: {e}")
+                return ""
+
+        async def async_main(iterations, urls_list):
+            async with aiohttp.ClientSession() as session:  # one shared session
+                tasks = []
+                for url in urls_list:
+                    print(f"Fetching: {url}")
+                    task = asyncio.create_task(get_async_url_response(session, url))
+                    tasks.append(task)
+
+                responses = await asyncio.gather(*tasks)
+
+                for i, response in enumerate(responses):
+                    if response:
+                        print(f"Response {i + 1}: {len(response)} characters")
+                    else:
+                        print(f"Response {i + 1}: <empty or error>")
+
+        # Windows fix for "Event loop is closed" warning
+        if sys.platform.startswith("win"):
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+        urls = [
+            'https://python.org',
+            'https://docs.python.org/3/library/asyncio.html',
+            'https://10.255.255.1',  # fake dead IP to test timeout
+            'https://en.wikipedia.org/wiki/Asynchronous_I/O',
+        ]
+
+        start = time.time()
+        results = await asyncio.to_thread(async_main, number_of_iterations, urls)
+        duration = time.time() - start
+
+        return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
+
+
+
+
+
+
+
+
+
     #endregion

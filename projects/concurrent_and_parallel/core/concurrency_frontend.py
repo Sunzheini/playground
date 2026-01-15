@@ -170,13 +170,13 @@ class ConcurrencyFrontend:
                               color='fifth').classes('flex-1')
 
                 with ui.row().classes('w-full space-x-2'):
-                    ui.button('',
+                    ui.button('Asyncio (1)', on_click=self.run_asyncio_1,
                               color='fifth').classes('flex-1')
-                    ui.button('',
+                    ui.button('Asyncio (2)', on_click=self.run_asyncio_2,
                               color='fifth').classes('flex-1')
-                    ui.button('',
+                    ui.button('Asyncio (3)', on_click=self.run_asyncio_3,
                               color='fifth').classes('flex-1')
-                    ui.button('',
+                    ui.button('Asyncio (4)', on_click=self.run_asyncio_4,
                               color='fifth').classes('flex-1')
                 #endregion
 
@@ -394,6 +394,54 @@ class ConcurrencyFrontend:
         self.add_to_history(*history)
 
     async def run_asyncio_auto(self) -> None:
+        """Run tasks using asyncio with asyncio.run()."""
+        self.start_execution('Asyncio')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_asyncio_1(self) -> None:
+        """Run tasks using asyncio with asyncio.run()."""
+        self.start_execution('Asyncio')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_asyncio_2(self) -> None:
+        """Run tasks using asyncio with asyncio.run()."""
+        self.start_execution('Asyncio')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_asyncio_3(self) -> None:
+        """Run tasks using asyncio with asyncio.run()."""
+        self.start_execution('Asyncio')
+        task_func = self.get_task_function()
+        num_iterations = int(self.iterations.value)
+        num_tasks = int(self.num_tasks.value)
+
+        results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
+
+        self.show_results(*results)
+        self.add_to_history(*history)
+
+    async def run_asyncio_4(self) -> None:
         """Run tasks using asyncio with asyncio.run()."""
         self.start_execution('Asyncio')
         task_func = self.get_task_function()
