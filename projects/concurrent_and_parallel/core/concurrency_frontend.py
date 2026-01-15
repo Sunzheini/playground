@@ -142,39 +142,39 @@ class ConcurrencyFrontend:
                 with ui.row().classes('w-full space-x-2'):
                     ui.button('Sequential', on_click=self.run_sequential,
                               color='third').classes('flex-1')
-                    ui.button('Multiprocessing (manual)', on_click=self.run_multiprocessing_manual,
-                              color='secondary').classes('flex-1')
-                    ui.button('Multiprocessing (auto)', on_click=self.run_multiprocessing_auto,
-                              color='secondary').classes('flex-1')
-                    ui.button('Multipr. (external program)', on_click=self.run_multiprocessing_another_program,
-                              color='secondary').classes('flex-1')
-
-                with ui.row().classes('w-full space-x-2'):
                     ui.button('Multithreading (auto)', on_click=self.run_multithreading_auto,
                               color='fourth').classes('flex-1')
-                    ui.button('Multithreading (manual)', on_click=self.run_multithreading_manual,
+                    ui.button('Try sync', on_click=self.run_multithreading_show_synchronization,
                               color='fourth').classes('flex-1')
-                    ui.button('Try thread restart', on_click=self.run_multithreading_try_restart,
-                              color='fourth').classes('flex-1')
-                    ui.button('Show state', on_click=self.run_multithreading_show_state,
-                              color='fourth').classes('flex-1')
+                    ui.button('Even loop demo', on_click=self.run_asyncio_event_loop_demo,
+                              color='fifth').classes('flex-1')
 
                 with ui.row().classes('w-full space-x-2'):
-                    ui.button('Try sync', on_click=self.run_multithreading_show_synchronization,
+                    ui.button('Multiprocessing (manual)', on_click=self.run_multiprocessing_manual,
+                              color='secondary').classes('flex-1')
+                    ui.button('Multithreading (manual)', on_click=self.run_multithreading_manual,
                               color='fourth').classes('flex-1')
                     ui.button('Try gil limit', on_click=self.run_multithreading_show_gil_limitation,
                               color='fourth').classes('flex-1')
-                    ui.button('Asyncio (Manual)', on_click=self.run_asyncio_manual,
-                              color='fifth').classes('flex-1')
-                    ui.button('Asyncio (Auto)', on_click=self.run_asyncio_auto,
+                    ui.button('Coro vs Gen', on_click=self.run_asyncio_coroutines_vs_generators,
                               color='fifth').classes('flex-1')
 
                 with ui.row().classes('w-full space-x-2'):
-                    ui.button('Even loop demo', on_click=self.run_asyncio_event_loop_demo,
-                              color='fifth').classes('flex-1')
-                    ui.button('Coro vs Gen', on_click=self.run_asyncio_coroutines_vs_generators,
+                    ui.button('Multiprocessing (auto)', on_click=self.run_multiprocessing_auto,
+                              color='secondary').classes('flex-1')
+                    ui.button('Try thread restart', on_click=self.run_multithreading_try_restart,
+                              color='fourth').classes('flex-1')
+                    ui.button('Asyncio (Manual)', on_click=self.run_asyncio_manual,
                               color='fifth').classes('flex-1')
                     ui.button('Comm demo', on_click=self.run_asyncio_communication_demo,
+                              color='fifth').classes('flex-1')
+
+                with ui.row().classes('w-full space-x-2'):
+                    ui.button('Multipr. (external program)', on_click=self.run_multiprocessing_another_program,
+                              color='secondary').classes('flex-1')
+                    ui.button('Show state', on_click=self.run_multithreading_show_state,
+                              color='fourth').classes('flex-1')
+                    ui.button('Asyncio (Auto)', on_click=self.run_asyncio_auto,
                               color='fifth').classes('flex-1')
                     ui.button('Aiohttp', on_click=self.run_asyncio_with_aiohttp,
                               color='fifth').classes('flex-1')
