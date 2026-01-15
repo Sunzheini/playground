@@ -824,7 +824,7 @@ class AppBackend:
         return results, 0.3
 
     @staticmethod
-    async def run_asyncio_with_aiohttp(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
+    async def run_asyncio_with_aiohttp(number_of_tasks: int) -> tuple:
         """
         Asyncio approach using aiohttp for true async I/O
         operations for network-bound tasks, e.g. HTTP requests.
@@ -840,43 +840,29 @@ class AppBackend:
             """
             try:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=3)) as response:
-                    return await response.text()
-            except asyncio.TimeoutError:
-                print(f"Timeout fetching {url}")
-                return ""
+                    text = await response.text()
+                    return f"{url}: {len(text)} chars"
             except Exception as e:
-                print(f"⚠Error fetching {url}: {e}")
-                return ""
+                return f"{url}: Error - {str(e)[:50]}"
 
-        async def async_main(iterations, urls_list):
+        async def async_main(urls_list):
             async with aiohttp.ClientSession() as session:  # one shared session
-                tasks = []
-                for url in urls_list:
-                    print(f"Fetching: {url}")
-                    task = asyncio.create_task(get_async_url_response(session, url))
-                    tasks.append(task)
-
-                responses = await asyncio.gather(*tasks)
-
-                for i, response in enumerate(responses):
-                    if response:
-                        print(f"Response {i + 1}: {len(response)} characters")
-                    else:
-                        print(f"Response {i + 1}: <empty or error>")
+                tasks = [get_async_url_response(session, url) for url in urls[:number_of_tasks]]
+                return await asyncio.gather(*tasks)
 
         # Windows fix for "Event loop is closed" warning
         if sys.platform.startswith("win"):
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
         urls = [
-            'https://python.org',
-            'https://docs.python.org/3/library/asyncio.html',
-            'https://10.255.255.1',  # fake dead IP to test timeout
-            'https://en.wikipedia.org/wiki/Asynchronous_I/O',
+            'https://httpbin.org/delay/1',  # Test with delay endpoint
+            'https://httpbin.org/delay/2',
+            'https://httpbin.org/status/404',  # Test error
+            'https://httpbin.org/json',
         ]
 
         start = time.time()
-        results = await asyncio.to_thread(async_main, number_of_iterations, urls)
+        results = await async_main(urls)
         duration = time.time() - start
 
         return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
