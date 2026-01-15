@@ -55,7 +55,11 @@ class ConcurrencyFrontend:
     #region UI Creation
     def create_ui(self):
         """Create the main UI layout and schedule background metrics."""
-        ui.colors(primary='#496CAB', secondary='#53B689', accent='#111B1E', positive='#53B689')
+        ui.colors(
+            primary='#496CAB', secondary='#53B689',
+            third='#7C3AED', fourth='#3B82F6', fifth='#F59E0B',
+            accent='#111B1E', positive='#53B689'
+        )
 
         # Header
         with ui.header().classes('bg-primary text-white'):
@@ -137,7 +141,7 @@ class ConcurrencyFrontend:
                 #region Execution buttons (NiceGUI supports async callbacks)
                 with ui.row().classes('w-full space-x-2'):
                     ui.button('Sequential', on_click=self.run_sequential,
-                              color='secondary').classes('flex-1')
+                              color='third').classes('flex-1')
                     ui.button('Multiprocessing (manual)', on_click=self.run_multiprocessing_manual,
                               color='secondary').classes('flex-1')
                     ui.button('Multiprocessing (auto)', on_click=self.run_multiprocessing_auto,
@@ -147,23 +151,33 @@ class ConcurrencyFrontend:
 
                 with ui.row().classes('w-full space-x-2'):
                     ui.button('Multithreading (auto)', on_click=self.run_multithreading_auto,
-                              color='secondary').classes('flex-1')
+                              color='fourth').classes('flex-1')
                     ui.button('Multithreading (manual)', on_click=self.run_multithreading_manual,
-                              color='secondary').classes('flex-1')
+                              color='fourth').classes('flex-1')
                     ui.button('Try thread restart', on_click=self.run_multithreading_try_restart,
-                              color='secondary').classes('flex-1')
+                              color='fourth').classes('flex-1')
                     ui.button('Show state', on_click=self.run_multithreading_show_state,
-                              color='secondary').classes('flex-1')
+                              color='fourth').classes('flex-1')
 
                 with ui.row().classes('w-full space-x-2'):
                     ui.button('Try sync', on_click=self.run_multithreading_show_synchronization,
-                              color='secondary').classes('flex-1')
+                              color='fourth').classes('flex-1')
                     ui.button('Try gil limit', on_click=self.run_multithreading_show_gil_limitation,
-                              color='secondary').classes('flex-1')
+                              color='fourth').classes('flex-1')
                     ui.button('Asyncio (Manual)', on_click=self.run_asyncio_manual,
-                              color='secondary').classes('flex-1')
+                              color='fifth').classes('flex-1')
                     ui.button('Asyncio (Auto)', on_click=self.run_asyncio_auto,
-                              color='secondary').classes('flex-1')
+                              color='fifth').classes('flex-1')
+
+                with ui.row().classes('w-full space-x-2'):
+                    ui.button('',
+                              color='fifth').classes('flex-1')
+                    ui.button('',
+                              color='fifth').classes('flex-1')
+                    ui.button('',
+                              color='fifth').classes('flex-1')
+                    ui.button('',
+                              color='fifth').classes('flex-1')
                 #endregion
 
                 #region  Results display
