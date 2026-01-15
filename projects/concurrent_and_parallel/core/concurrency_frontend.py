@@ -170,13 +170,13 @@ class ConcurrencyFrontend:
                               color='fifth').classes('flex-1')
 
                 with ui.row().classes('w-full space-x-2'):
-                    ui.button('Asyncio (1)', on_click=self.run_asyncio_1,
+                    ui.button('Even loop demo', on_click=self.run_asyncio_event_loop_demo,
                               color='fifth').classes('flex-1')
-                    ui.button('Asyncio (2)', on_click=self.run_asyncio_2,
+                    ui.button('Coro vs Gen', on_click=self.run_asyncio_coroutines_vs_generators,
                               color='fifth').classes('flex-1')
-                    ui.button('Asyncio (3)', on_click=self.run_asyncio_3,
+                    ui.button('Comm demo', on_click=self.run_asyncio_communication_demo,
                               color='fifth').classes('flex-1')
-                    ui.button('Asyncio (4)', on_click=self.run_asyncio_4,
+                    ui.button('Aiohttp', on_click=self.run_asyncio_with_aiohttp,
                               color='fifth').classes('flex-1')
                 #endregion
 
@@ -405,43 +405,34 @@ class ConcurrencyFrontend:
         self.show_results(*results)
         self.add_to_history(*history)
 
-    async def run_asyncio_1(self) -> None:
+    async def run_asyncio_event_loop_demo(self) -> None:
         """Run tasks using asyncio with asyncio.run()."""
         self.start_execution('Asyncio')
-        task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
 
-        results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
+        results, duration = await self.backend.demonstrate_event_loop_management()
 
-        self.show_results(*results)
-        self.add_to_history(*history)
+        self.results_label.set_text(f'Event Loop Demo:\n{chr(10).join(results)}')
+        self.add_to_history('Event Loop Demo', duration, 2)
 
-    async def run_asyncio_2(self) -> None:
+    async def run_asyncio_coroutines_vs_generators(self) -> None:
         """Run tasks using asyncio with asyncio.run()."""
         self.start_execution('Asyncio')
-        task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
 
-        results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
+        results, duration = await self.backend.demonstrate_coroutines_vs_generators()
 
-        self.show_results(*results)
-        self.add_to_history(*history)
+        self.results_label.set_text(f'Coroutines vs Generators:\n{chr(10).join(results)}')
+        self.add_to_history('Coroutines vs Gens Demo', duration, 0)
 
-    async def run_asyncio_3(self) -> None:
+    async def run_asyncio_communication_demo(self) -> None:
         """Run tasks using asyncio with asyncio.run()."""
         self.start_execution('Asyncio')
-        task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
 
-        results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
+        results, duration = await self.backend.demonstrate_async_communication()
 
-        self.show_results(*results)
-        self.add_to_history(*history)
+        self.results_label.set_text(f'Async Communication:\n{chr(10).join(results)}')
+        self.add_to_history('Async Comm Demo', duration, 3)
 
-    async def run_asyncio_4(self) -> None:
+    async def run_asyncio_with_aiohttp(self) -> None:
         """Run tasks using asyncio with asyncio.run()."""
         self.start_execution('Asyncio')
         task_func = self.get_task_function()

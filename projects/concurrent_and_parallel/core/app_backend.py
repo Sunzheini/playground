@@ -637,13 +637,191 @@ class AppBackend:
 
         return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
 
+    @staticmethod
+    async def demonstrate_event_loop_management():
+        """
+        Explicitly shows event loop management.
 
+        Demonstrates:
+        1. Getting current event loop
+        2. Scheduling tasks on event loop
+        3. Event loop states and methods
+        4. Manual vs automatic loop management
+        """
+        results = []
 
+        # Get the current running event loop
+        loop = asyncio.get_running_loop()
+        results.append("=== Current Event Loop ===")
+        results.append(f"Loop type: {type(loop).__name__}")
+        results.append(f"Is running: {loop.is_running()}")
+        results.append(f"Is closed: {loop.is_closed()}")
+        results.append(f"Loop time: {loop.time():.6f}")
 
+        # Demonstrate scheduling
+        results.append("")
+        results.append("=== Scheduling Tasks ===")
 
+        async def sample_task(task_id):
+            await asyncio.sleep(0.1)
+            return f"Task {task_id} completed"
 
+        # Schedule tasks using different methods
+        task1 = asyncio.create_task(sample_task(1))
+        results.append(f"Created task 1: {task1}")
 
+        # Using ensure_future (older method)
+        coro = sample_task(2)
+        task2 = asyncio.ensure_future(coro)
+        results.append(f"Created task 2 (ensure_future): {task2}")
 
+        # Wait for tasks
+        await asyncio.gather(task1, task2)
+        results.append("Both tasks completed")
+        results.append(f"Task 1 result: {task1.result()}")
+        results.append(f"Task 2 result: {task2.result()}")
+
+        # Show loop methods
+        results.append("")
+        results.append("=== Event Loop Methods ===")
+        results.append("loop.create_task() - Schedule coroutine as task")
+        results.append("loop.run_until_complete() - Run until future completes")
+        results.append("loop.run_forever() - Run loop indefinitely")
+        results.append("loop.stop() - Stop running loop")
+        results.append("loop.close() - Close loop")
+
+        return results, 0.2
+
+    @staticmethod
+    async def demonstrate_coroutines_vs_generators():
+        """
+        Shows the difference between coroutines and generators.
+
+        Required knowledge point from requirements.
+        """
+        results = []
+
+        results.append("=== Generators (yield) ===")
+        results.append("Synchronous, produce values on demand")
+
+        def number_generator(n):
+            """Traditional generator using yield."""
+            for i in range(n):
+                yield i  # Produces value, pauses, resumes when next() called
+
+        # Demonstrate generator
+        gen = number_generator(3)
+        results.append(f"Generator type: {type(gen)}")
+        results.append(f"First value: {next(gen)}")
+        results.append(f"Second value: {next(gen)}")
+        results.append("Values are pulled with next()")
+        results.append("Generator state: can send() values, throw() exceptions")
+
+        results.append("")
+        results.append("=== Coroutines (async/await) ===")
+        results.append("Asynchronous, can await other async operations")
+
+        async def number_coroutine(n):
+            """Async coroutine."""
+            for i in range(n):
+                await asyncio.sleep(0.01)  # Can await!
+                yield i  # Async generator (Python 3.6+)
+
+        results.append(f"Coroutine type: async function")
+        results.append("Uses 'async def' instead of 'def'")
+        results.append("Can use 'await' to pause for async operations")
+        results.append("Managed by event loop, not manually with next()")
+
+        results.append("")
+        results.append("=== Key Differences ===")
+        results.append("1. Generators: yield VALUES (synchronous)")
+        results.append("2. Coroutines: await OPERATIONS (asynchronous)")
+        results.append("3. Generators: implement iterator protocol")
+        results.append("4. Coroutines: implement async iterator protocol")
+        results.append("5. Generators: controlled by caller (next())")
+        results.append("6. Coroutines: controlled by event loop")
+        results.append("7. Generators: good for lazy sequences")
+        results.append("8. Coroutines: good for concurrent I/O")
+
+        results.append("")
+        results.append("=== Historical Context ===")
+        results.append("Before async/await (Python 3.5):")
+        results.append("- Used @asyncio.coroutine decorator")
+        results.append("- Used 'yield from' for async operations")
+        results.append("- Confusing mix of generators and coroutines")
+        results.append("")
+        results.append("After async/await (Python 3.5+):")
+        results.append("- Clear separation: generators vs coroutines")
+        results.append("- 'async def' for coroutines, 'def' for generators")
+        results.append("- 'await' for async, 'yield' for values")
+
+        return results, 0.0
+
+    @staticmethod
+    async def demonstrate_async_communication():
+        """
+        Simple demonstration of async communication patterns.
+
+        Shows transports and protocols concept.
+        """
+        results = []
+
+        results.append("=== Async Communication Patterns ===")
+
+        # 1. Async Queue (common pattern)
+        results.append("")
+        results.append("1. Async Queue (producer/consumer):")
+
+        queue = asyncio.Queue(maxsize=2)
+
+        async def producer(name, items):
+            for item in items:
+                await queue.put(item)
+                results.append(f"{name} produced: {item}")
+                await asyncio.sleep(0.05)
+
+        async def consumer(name):
+            while True:
+                item = await queue.get()
+                results.append(f"{name} consumed: {item}")
+                queue.task_done()
+                if item == "DONE":
+                    break
+
+        # Run producer/consumer
+        producer_task = asyncio.create_task(producer("P1", ["A", "B", "C", "DONE"]))
+        consumer_task = asyncio.create_task(consumer("C1"))
+
+        await asyncio.gather(producer_task, consumer_task)
+
+        # 2. Event (signaling)
+        results.append("")
+        results.append("2. Async Event (signaling):")
+
+        event = asyncio.Event()
+
+        async def waiter(name):
+            results.append(f"{name} waiting for event...")
+            await event.wait()
+            results.append(f"{name} received event!")
+
+        async def setter():
+            await asyncio.sleep(0.1)
+            results.append("Setting event...")
+            event.set()
+
+        await asyncio.gather(waiter("Waiter1"), waiter("Waiter2"), setter())
+
+        # 3. Transports/Protocols concept
+        results.append("")
+        results.append("3. Transports and Protocols (Concept):")
+        results.append("Transports: Low-level connection abstraction")
+        results.append("  - TCP, SSL, Unix sockets, etc.")
+        results.append("Protocols: Application-level logic")
+        results.append("  - HTTP, WebSocket, custom protocols")
+        results.append("Example: asyncio.start_server() uses transports/protocols")
+
+        return results, 0.3
 
     @staticmethod
     async def run_asyncio_with_aiohttp(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
@@ -702,13 +880,4 @@ class AppBackend:
         duration = time.time() - start
 
         return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
-
-
-
-
-
-
-
-
-
     #endregion
