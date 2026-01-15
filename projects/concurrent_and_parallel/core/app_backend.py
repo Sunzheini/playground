@@ -637,6 +637,14 @@ class AppBackend:
 
         return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
 
+
+
+
+
+
+
+
+
     @staticmethod
     async def run_asyncio_with_aiohttp(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
         """
