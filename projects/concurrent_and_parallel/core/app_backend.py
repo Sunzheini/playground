@@ -1,17 +1,16 @@
 """
-Module: app_backend
+Module: app_backend. The backend of the concurrency and parallelism application.
 """
-import asyncio
+import os
 import sys
-
+import time
+import asyncio
 import aiohttp
 import multiprocessing
-import os
 import subprocess
 import threading
-import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-from asyncio import get_event_loop, gather, wait, new_event_loop, set_event_loop, create_task, run
+from asyncio import new_event_loop
 
 
 class AppBackend:
@@ -32,12 +31,7 @@ class AppBackend:
 
 
         **Sequential**: Runs tasks one after another. Slowest for multiple tasks.
-        Visual timeline:
-        Task 1: [======]
-        Task 2:        [======]
-        Task 3:               [======]
-        Task 4:                      [======]
-        # No overlap, no parallelism
+        No overlap, no parallelism
 
 
         **Multiprocessing**: Uses multiple processes (good for CPU-bound tasks)
@@ -102,10 +96,10 @@ class AppBackend:
         - Mixed: Combination of both
         
         **Notes**:
-        # Creating processes/threads has cost:
+        Creating processes/threads has cost:
         Process creation: ~0.1s overhead
         Thread creation: ~0.01s overhead
-        # If tasks are very short, overhead dominates
+        If tasks are very short, overhead dominates
 
         Adjust the sliders to see how different parameters affect performance!
         '''
