@@ -5,12 +5,17 @@ import os
 import sys
 import time
 import asyncio
+from random import random
+
 import aiohttp
 import multiprocessing
 import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from asyncio import new_event_loop
+
+from lab.exercise_beautiful_soup import CustomScraper
+from projects.concurrent_and_parallel.workers.custom_thread_worker import CustomThreadWorker
 
 
 class AppBackend:
@@ -852,4 +857,76 @@ class AppBackend:
         duration = time.time() - start
 
         return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
+    #endregion
+
+    #region 5. Custom examples
+    @staticmethod
+    async def custom_example_1() -> tuple:
+        """
+        multiprocessing.Queue: 2 processes, each with multiple threads and a shared queue
+
+        Producer runs in its own process → scrapes, spawns threads, collects results → puts results into the multiprocessing.Queue.
+        Consumer runs in its own process → continuously get()s items from the queue → stops when it sees the None sentinel.
+        Queue is shared between processes because multiprocessing.Queue is designed for inter-process communication.
+        """
+        def sleeper_function(seconds):
+            time.sleep(seconds)
+
+        def producer(q):
+            link = 'https://en.wikipedia.org/wiki/Fortune_500'
+            target_class = 'wikitable'
+
+            for i in range(3):
+                scraper = CustomScraper(link)
+
+                worker1 = CustomThreadWorker(target=scraper.get_results, args=('', 'table', 'class', target_class))
+                worker2 = CustomThreadWorker(target=sleeper_function, args=(2,))
+
+                worker1.start()
+                worker2.start()
+
+                worker1.join()
+                worker2.join()
+
+                result = random()
+                q.put(result)  # you cannot put worker in the queue
+
+            q.put(None)  # signal that production is done
+
+        def consumer(q):
+            workers = []
+
+            while True:
+                try:
+                    item = q.get(
+                        timeout=10)  # blocks until the producer puts something in, it will start consuming as soon as the first item is produced
+                except Exception as e:
+                    print(f"Consumer timed out waiting for item: {e}")
+                    break
+
+                if item is None:
+                    break
+                worker = CustomThreadWorker(target=sleeper_function, args=(2,))
+                workers.append(worker)
+                worker.start()
+
+            [w.join() for w in workers]
+
+        def run():
+            queue = multiprocessing.Queue()
+
+            process1 = multiprocessing.Process(target=producer, args=(queue,))
+            process2 = multiprocessing.Process(target=consumer, args=(queue,))
+
+            process1.start()
+            process2.start()
+
+            process1.join()
+            process2.join()
+
+        start = time.time()
+        await asyncio.to_thread(run)
+        duration = time.time() - start
+
+        return ('Custom Example 1', duration, []), ('Custom Example 1', duration, 1)
     #endregion
