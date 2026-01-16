@@ -127,13 +127,13 @@ class AppBackend:
         """
         # Execute the blocking loop in a background thread
         def sync_run():
-            results = []
+            results_list = []
             for _ in range(number_of_tasks):
                 try:
-                    results.append(task_function(number_of_iterations))
+                    results_list.append(task_function(number_of_iterations))
                 except Exception as e:
-                    results.append(e)
-            return results
+                    results_list.append(e)
+            return results_list
 
         start = time.time()
         results = await asyncio.to_thread(sync_run)
@@ -172,7 +172,7 @@ class AppBackend:
         4. Lower-level control compared to ProcessPoolExecutor
         """
         def sync_run():
-            results = []
+            results_list = []
 
             processes = []
             results_queue = multiprocessing.Queue()
@@ -196,9 +196,9 @@ class AppBackend:
                 # 3. Collect results
                 while not results_queue.empty():
                     task_id, result = results_queue.get(timeout=30)
-                    results.append(result)
+                    results_list.append(result)
 
-                return results
+                return results_list
 
             finally:
                 # Ensure all processes are terminated
@@ -233,7 +233,7 @@ class AppBackend:
             Needed because multiprocessing is synchronous/blocking
             :return: list of results from all tasks
             """
-            results = []
+            results_list = []
             ctx = multiprocessing.get_context('spawn')  # Safe for Windows (creates fresh Python processes)
 
             # 1. Create and start processes
@@ -249,10 +249,10 @@ class AppBackend:
                 # 2. Wait for all processes to complete / 3. Collect results
                 for f in futures:
                     try:
-                        results.append(f.result())  # Blocks until task completes
+                        results_list.append(f.result())  # Blocks until task completes
                     except Exception as e:
-                        results.append(e)
-            return results
+                        results_list.append(e)
+            return results_list
 
         start = time.time()
         """
@@ -340,7 +340,7 @@ class AppBackend:
         """
         def sync_run():
             """Wrap the synchronous Thread work in a function and run it in a thread"""
-            results = []
+            results_list = []
             threads = []
 
             results_lock = threading.Lock()     # To protect shared results list
@@ -350,7 +350,7 @@ class AppBackend:
                 for thread_id in range(number_of_tasks):
                     thread = threading.Thread(
                         target=AppBackend._multithreading_worker,
-                        args=(task_function, number_of_iterations, thread_id, results, results_lock)
+                        args=(task_function, number_of_iterations, thread_id, results_list, results_lock)
                     )
 
                     thread.start()
@@ -361,8 +361,8 @@ class AppBackend:
                     thread.join()
 
                 # 3. Collect results
-                results.sort(key=lambda x: x[0])    # Sort by worker_id and extract results
-                return [r[1] for r in results]
+                results_list.sort(key=lambda x: x[0])    # Sort by worker_id and extract results
+                return [r[1] for r in results_list]
 
             finally:
                 # Ensure all threads are cleaned up
@@ -392,7 +392,7 @@ class AppBackend:
         :return: tuple containing results and performance metrics
         """
         def sync_run():
-            results = []
+            results_list = []
 
             # 1. Create and start processes
             with ThreadPoolExecutor(max_workers=number_of_tasks) as executor:
@@ -401,10 +401,10 @@ class AppBackend:
                 # 2. Wait for all processes to complete / 3. Collect results
                 for f in futures:
                     try:
-                        results.append(f.result())  # Blocks until task completes
+                        results_list.append(f.result())  # Blocks until task completes
                     except Exception as e:
-                        results.append(e)
-            return results
+                        results_list.append(e)
+            return results_list
 
         start = time.time()
         results = await asyncio.to_thread(sync_run)
@@ -413,7 +413,7 @@ class AppBackend:
         return ('Threading', duration, results), ('Threading', duration, number_of_tasks)
 
     @staticmethod
-    async def demonstrate_thread_reuse():
+    async def demonstrate_thread_reuse() -> tuple:
         """Show that threads cannot be restarted."""
         def worker():
             print(f"Thread {threading.current_thread().name} running")
@@ -432,7 +432,7 @@ class AppBackend:
             return [f"Thread CANNOT be restarted: {e}"], 0.0
 
     @staticmethod
-    async def demonstrate_thread_states():
+    async def demonstrate_thread_states() -> tuple:
         """Show thread states during lifecycle."""
         states_info = []
 
@@ -454,7 +454,7 @@ class AppBackend:
         return states_info, 0.0
 
     @staticmethod
-    async def demonstrate_thread_synchronization():
+    async def demonstrate_thread_synchronization() -> tuple:
         """Show race condition and lock solution."""
 
         def sync_run():
@@ -504,7 +504,7 @@ class AppBackend:
         return await asyncio.to_thread(sync_run)
 
     @staticmethod
-    async def demonstrate_gil_limitation():
+    async def demonstrate_gil_limitation() -> tuple:
         """Show that threading doesn't help CPU-bound tasks."""
 
         def sync_run():
@@ -548,7 +548,6 @@ class AppBackend:
     async def run_asyncio_manually(task_function, number_of_iterations: int, number_of_tasks: int) -> tuple:
         """
         Manual asyncio approach using asyncio.to_thread.
-
         Info:
         - async keyword specifies that this is a coroutine
         - asyncio.create_task() schedules coroutine on event loop
@@ -581,9 +580,9 @@ class AppBackend:
                 gather_coroutine = asyncio.gather(*tasks, return_exceptions=True)
 
                 # 3. Run the event loop to completion and collect results
-                results = list(loop.run_until_complete(gather_coroutine))
+                results_from_run = list(loop.run_until_complete(gather_coroutine))
 
-                return results
+                return results_from_run
 
             finally:
                 # Clean up the event loop
@@ -632,7 +631,7 @@ class AppBackend:
         return ('Asyncio (auto) ', duration, results), ('Asyncio (auto)', duration, number_of_tasks)
 
     @staticmethod
-    async def demonstrate_event_loop_management():
+    async def demonstrate_event_loop_management() -> tuple:
         """
         Explicitly shows event loop management.
 
@@ -687,16 +686,13 @@ class AppBackend:
         return results, 0.2
 
     @staticmethod
-    async def demonstrate_coroutines_vs_generators():
+    async def demonstrate_coroutines_vs_generators() -> tuple:
         """
         Shows the difference between coroutines and generators.
 
         Required knowledge point from requirements.
         """
-        results = []
-
-        results.append("=== Generators (yield) ===")
-        results.append("Synchronous, produce values on demand")
+        results = ["=== Generators (yield) ===", "Synchronous, produce values on demand"]
 
         def number_generator(n):
             """Traditional generator using yield."""
@@ -752,19 +748,15 @@ class AppBackend:
         return results, 0.0
 
     @staticmethod
-    async def demonstrate_async_communication():
+    async def demonstrate_async_communication() -> tuple:
         """
         Simple demonstration of async communication patterns.
 
         Shows transports and protocols concept.
         """
-        results = []
-
-        results.append("=== Async Communication Patterns ===")
+        results = ["=== Async Communication Patterns ===", "", "1. Async Queue (producer/consumer):"]
 
         # 1. Async Queue (common pattern)
-        results.append("")
-        results.append("1. Async Queue (producer/consumer):")
 
         queue = asyncio.Queue(maxsize=2)
 

@@ -33,27 +33,20 @@ class ConcurrencyFrontend:
         self.iterations = None
         self.num_tasks = None
         self.results_label = None
-        self.cpu_label = None
-        self.memory_label = None
-        self.thread_count_label = None
         self.history_table = None
-        self.chart_container = None
         #endregion
 
         #region collections
+        self.results = None
         self.task_choices = ['CPU Intensive', 'IO Intensive', 'Mixed']
         #endregion
 
         #region state
-        self.running_tasks = set()
-        self.results = []
-        self.cpu_usage = []
-        self.memory_usage = []
         self.start_time = None
         #endregion
 
     #region UI Creation
-    def create_ui(self):
+    def create_ui(self) -> None:
         """Create the main UI layout and schedule background metrics."""
         ui.colors(
             primary='#496CAB', secondary='#53B689',
@@ -68,7 +61,7 @@ class ConcurrencyFrontend:
             ui.button('ℹ️', on_click=self._show_info).props('flat')
 
         # Main content
-        with (((ui.row().classes('w-full')))):
+        with ((ui.row().classes('w-full'))):
             # Left panel - Controls
             with ui.column().classes('33vw p-4 space-y-4'):
                 ui.label('Task Configuration').classes('text-h5')
@@ -271,7 +264,7 @@ class ConcurrencyFrontend:
     #endregion
 
     #region Concurrency Methods
-    async def run_sequential(self):
+    async def run_sequential(self) -> None:
         """Run tasks sequentially but offload the actual computation to a thread.
 
         This keeps the UI responsive while the CPU/IO work executes in a background
@@ -381,7 +374,7 @@ class ConcurrencyFrontend:
 
         self.results_label.set_text(f'GIL Limitation Demo:\n{chr(10).join(results)}')
 
-    async def run_asyncio_manual(self):
+    async def run_asyncio_manual(self) -> None:
         """Run tasks using asyncio with manual event loop management."""
         self.start_execution('Asyncio')
         task_func = self.get_task_function()
