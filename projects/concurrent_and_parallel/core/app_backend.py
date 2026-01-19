@@ -525,20 +525,25 @@ class AppBackend:
 
         def sync_run():
             def cpu_worker(n):
+                """Pure CPU-bound work."""
                 result = 0
-                for i in range(n):
-                    result += i * i
+                for i in range(n):      # pure CPU work
+                    result += i * i     # No I/O, no sleep
                 return result
 
             n = 10000000  # 10 million iterations
 
-            # Sequential
+            # ----------------------------------------------------------------------------
+            # Sequential (Baseline)
+            # ----------------------------------------------------------------------------
             start = time.time()
             for _ in range(4):
                 cpu_worker(n)
             seq_time = time.time() - start
 
+            # ----------------------------------------------------------------------------
             # Threaded
+            # ----------------------------------------------------------------------------
             start = time.time()
             threads = []
             for _ in range(4):
