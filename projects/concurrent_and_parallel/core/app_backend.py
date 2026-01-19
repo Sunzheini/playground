@@ -59,7 +59,7 @@ class AppBackend:
         2. This creates a completely separate process with its own memory space.
 
 
-        **Threading**: Uses multiple threads (good for I/O-bound tasks)
+        **Threading**: Uses multiple threads (good for I/O-bound tasks, e.g. file I/O, network)
         I/O-bound tasks that use blocking libraries (not async-friendly)
         GUI responsiveness
         Tasks where you want real OS threads

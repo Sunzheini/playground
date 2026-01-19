@@ -206,7 +206,7 @@ class ConcurrencyFrontend:
     #region General methods
     def _show_info(self) -> None:
         """Show information dialog describing the demo."""
-        with ui.dialog() as dialog, ui.card():
+        with ui.dialog() as dialog, ui.card().style('width: 1200px; max-width: 90vw;'):
             ui.markdown(self.backend.info_text)
             ui.button('Close', on_click=dialog.close)
         dialog.open()
