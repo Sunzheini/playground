@@ -28,8 +28,10 @@ class ConcurrencyFrontend:
 
         #region ui elements
         self.task_type = None
-        self.iterations = None
-        self.num_tasks = None
+        self.iterations_slider = None
+        self.iterations_slider_input_field = None
+        self.num_tasks_slider = None
+        self.num_tasks_input_field = None
         self.results_label = None
         self.history_table = None
         #endregion
@@ -88,18 +90,18 @@ class ConcurrencyFrontend:
                                 ui.label(str(self.min_iterations)).classes('text-caption text-grey w-12')
 
                                 # Slider
-                                self.iterations = ui.slider(
+                                self.iterations_slider = ui.slider(
                                     min=self.min_iterations, max=self.max_iterations, value=self.current_iterations
                                 ).classes('flex-grow').on('update:model-value',
-                                                          lambda e: number_input.set_value(e.args))
+                                                          lambda e: self.iterations_slider_input_field.set_value(e.args))
 
                                 # Max value display
                                 ui.label(str(self.max_iterations)).classes('text-caption text-grey w-12')
 
-                                number_input = ui.number(
+                                self.iterations_slider_input_field = ui.number(
                                     min=self.min_iterations, max=self.max_iterations, value=self.current_iterations
                                 ).classes('w-40 ml-36').on('update:model-value',
-                                                           lambda e: self.iterations.set_value(e.args))
+                                                           lambda e: self.iterations_slider.set_value(e.args))
                     # endregion
 
                     # region Number of tasks
@@ -115,19 +117,19 @@ class ConcurrencyFrontend:
                                 ui.label(str(self.min_tasks)).classes('text-caption text-grey w-12')
 
                                 # Slider
-                                self.num_tasks = ui.slider(
+                                self.num_tasks_slider = ui.slider(
                                     min=self.min_tasks, max=self.max_tasks, value=self.current_tasks
                                 ).classes('flex-grow').on('update:model-value',
-                                                          lambda e: num_tasks_input.set_value(e.args))
+                                                          lambda e: self.num_tasks_input_field.set_value(e.args))
 
                                 # Max value display
                                 ui.label(str(self.max_tasks)).classes('text-caption text-grey w-12')
 
                                 # Number input for precise control
-                                num_tasks_input = ui.number(
+                                self.num_tasks_input_field = ui.number(
                                     min=self.min_tasks, max=self.max_tasks, value=self.current_tasks
                                 ).classes('w-40 ml-36').on('update:model-value',
-                                                           lambda e: self.num_tasks.set_value(e.args))
+                                                           lambda e: self.num_tasks_slider.set_value(e.args))
                     # endregion
 
                 #region Execution buttons (NiceGUI supports async callbacks)
@@ -222,14 +224,20 @@ class ConcurrencyFrontend:
     def update_task_settings(self, task_type: str) -> None:
         """Update default settings based on selected task type."""
         if task_type == 'CPU Intensive':
-            self.iterations.set_value(4000000)
-            self.num_tasks.set_value(4)
+            self.iterations_slider.set_value(4000000)
+            self.iterations_slider_input_field.set_value(4000000)
+            self.num_tasks_slider.set_value(4)
+            self.num_tasks_input_field.set_value(4)
         elif task_type == 'IO Intensive':
-            self.iterations.set_value(1000)
-            self.num_tasks.set_value(20)
+            self.iterations_slider.set_value(1000)
+            self.iterations_slider_input_field.set_value(1000)
+            self.num_tasks_slider.set_value(20)
+            self.num_tasks_input_field.set_value(20)
         elif task_type == 'Mixed':
-            self.iterations.set_value(1000000)
-            self.num_tasks.set_value(8)
+            self.iterations_slider.set_value(1000000)
+            self.iterations_slider_input_field.set_value(1000000)
+            self.num_tasks_slider.set_value(8)
+            self.num_tasks_input_field.set_value(8)
 
     def get_task_function(self):
         """Return a module-level function (pickle-able) for the selected task type."""
@@ -288,8 +296,8 @@ class ConcurrencyFrontend:
         """
         self.start_execution('Sequential')
         task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
+        num_iterations = int(self.iterations_slider.value)
+        num_tasks = int(self.num_tasks_slider.value)
 
         results, history = await self.backend.run_sequential(task_func, num_iterations, num_tasks)
 
@@ -302,8 +310,8 @@ class ConcurrencyFrontend:
         """
         self.start_execution('Multiprocessing')
         task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
+        num_iterations = int(self.iterations_slider.value)
+        num_tasks = int(self.num_tasks_slider.value)
 
         results, history = await self.backend.run_multiprocessing_manual_approach_with_queue(task_func, num_iterations, num_tasks)
 
@@ -316,8 +324,8 @@ class ConcurrencyFrontend:
         """
         self.start_execution('Multiprocessing')
         task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
+        num_iterations = int(self.iterations_slider.value)
+        num_tasks = int(self.num_tasks_slider.value)
 
         results, history = await self.backend.run_multiprocessing_executor_approach(task_func, num_iterations, num_tasks)
 
@@ -325,7 +333,7 @@ class ConcurrencyFrontend:
         self.add_to_history(*history)
 
     async def run_multiprocessing_another_program(self) -> None:
-        """"Run tasks using an external Python program via multiprocessing."""
+        """Run tasks using an external Python program via multiprocessing."""
         results, history = await self.backend.run_multiprocessing_external_program()
 
         self.show_results(*results)
@@ -338,8 +346,8 @@ class ConcurrencyFrontend:
         """
         self.start_execution('Threading')
         task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
+        num_iterations = int(self.iterations_slider.value)
+        num_tasks = int(self.num_tasks_slider.value)
 
         results, history = await self.backend.run_multithreading_manual_approach(task_func, num_iterations, num_tasks)
 
@@ -350,8 +358,8 @@ class ConcurrencyFrontend:
         """Run tasks using ThreadPoolExecutor without blocking the event loop."""
         self.start_execution('Threading')
         task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
+        num_iterations = int(self.iterations_slider.value)
+        num_tasks = int(self.num_tasks_slider.value)
 
         results, history = await self.backend.run_multithreading_executor_approach(task_func, num_iterations, num_tasks)
 
@@ -394,8 +402,8 @@ class ConcurrencyFrontend:
         """Run tasks using asyncio with manual event loop management."""
         self.start_execution('Asyncio')
         task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
+        num_iterations = int(self.iterations_slider.value)
+        num_tasks = int(self.num_tasks_slider.value)
 
         results, history = await self.backend.run_asyncio_manually(task_func, num_iterations, num_tasks)
 
@@ -406,8 +414,8 @@ class ConcurrencyFrontend:
         """Run tasks using asyncio with asyncio.run()."""
         self.start_execution('Asyncio')
         task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
+        num_iterations = int(self.iterations_slider.value)
+        num_tasks = int(self.num_tasks_slider.value)
 
         results, history = await self.backend.run_asyncio_auto(task_func, num_iterations, num_tasks)
 
@@ -445,8 +453,8 @@ class ConcurrencyFrontend:
         """Run tasks using asyncio with asyncio.run()."""
         self.start_execution('Asyncio')
         task_func = self.get_task_function()
-        num_iterations = int(self.iterations.value)
-        num_tasks = int(self.num_tasks.value)
+        num_iterations = int(self.iterations_slider.value)
+        num_tasks = int(self.num_tasks_slider.value)
 
         results, history = await self.backend.run_asyncio_with_aiohttp(num_tasks)
 
