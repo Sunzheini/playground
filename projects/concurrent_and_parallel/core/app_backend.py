@@ -187,7 +187,7 @@ class AppBackend:
                 for process_id in range(number_of_tasks):
                     p = multiprocessing.Process(
                         # target=task_function, # cannot pass non-picklable functions, so we use a module-level wrapper
-                        # it would work if we didnt use results = await asyncio.to_thread(sync_run), because of niceui!
+                        # it works if we don't use `results = await asyncio.to_thread(sync_run)`, 'cause of nicegui!
                         target=AppBackend._multiprocessing_worker,
                         args=(task_function, number_of_iterations, process_id, results_queue)
                     )
@@ -448,13 +448,17 @@ class AppBackend:
 
         # Initial state
         states_info.append(f"Created: {thread.is_alive()} (alive={thread.is_alive()})")
+        # .is_alive() is the only thread state indicator in Python
+        states_info.append("   Must be: False - thread exists but hasn't started yet")
 
         thread.start()
         await asyncio.sleep(0.1)
         states_info.append(f"Running: {thread.is_alive()} (alive={thread.is_alive()})")
+        states_info.append("   Must be: True - thread has started and is running")
 
         thread.join()
         states_info.append(f"Finished: {thread.is_alive()} (alive={thread.is_alive()})")
+        states_info.append("   Must be: False - thread has completed execution")
 
         return states_info, 0.0
 

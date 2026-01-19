@@ -179,7 +179,7 @@ class ConcurrencyFrontend:
                     ui.label('Results').classes('text-h6 font-bold mb-0')
 
                     # Container with fixed height and scrolling
-                    with ui.scroll_area().classes('max-h-32 w-full'):  # max-h-32 limits height to ~128px
+                    with ui.scroll_area().classes('max-h-40 w-full  -mt-4'):
                         self.results_label = ui.label('Results will appear here') \
                             .classes('text-body1 break-words whitespace-pre-line')
                 #endregion
