@@ -681,12 +681,12 @@ class AppBackend:
             return f"Task {task_id} completed"
 
         # Schedule tasks using different methods
-        task1 = asyncio.create_task(sample_task(1))
-        results.append(f"Created task 1: {task1}")
+        task1 = asyncio.create_task(sample_task(1))     # recommended method!
+        results.append(f"Created task 1 (create_task): {task1}")
 
         # Using ensure_future (older method)
         coro = sample_task(2)
-        task2 = asyncio.ensure_future(coro)
+        task2 = asyncio.ensure_future(coro)     # legacy but still works
         results.append(f"Created task 2 (ensure_future): {task2}")
 
         # Wait for tasks
@@ -782,16 +782,18 @@ class AppBackend:
         queue = asyncio.Queue(maxsize=2)
 
         async def producer(name, items):
+            """Produce items and put them in the queue."""
             for item in items:
-                await queue.put(item)
+                await queue.put(item)    # Async put (waits if queue full)
                 results.append(f"{name} produced: {item}")
                 await asyncio.sleep(0.05)
 
         async def consumer(name):
+            """Consume items from the queue."""
             while True:
-                item = await queue.get()
+                item = await queue.get()    # Async get (waits if queue empty)
                 results.append(f"{name} consumed: {item}")
-                queue.task_done()
+                queue.task_done()           # ← Mark task complete
                 if item == "DONE":
                     break
 
@@ -809,13 +811,13 @@ class AppBackend:
 
         async def waiter(name):
             results.append(f"{name} waiting for event...")
-            await event.wait()
+            await event.wait()      # Wait until event is set
             results.append(f"{name} received event!")
 
         async def setter():
             await asyncio.sleep(0.1)
             results.append("Setting event...")
-            event.set()
+            event.set()     # Signal all waiters
 
         await asyncio.gather(waiter("Waiter1"), waiter("Waiter2"), setter())
 
