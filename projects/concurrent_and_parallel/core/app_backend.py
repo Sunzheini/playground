@@ -469,16 +469,21 @@ class AppBackend:
         def sync_run():
             results = []
 
-            # Without lock (race condition)
+            # --------------------------------------------------------------------------------
+            # Without lock (race condition POSSIBLE)
+            # ---------------------------------------------------------------------------------
             counter = 0
 
             def increment():
                 nonlocal counter
-                for _ in range(1000):
-                    counter += 1
+                for _ in range(10000):   # 1000 increments per thread
+                    counter += 1        # ← POTENTIAL RACE CONDITION HERE!
+
+            # 10 threads × 1000 increments = should be 10000
+            # But you MAY get less than 10000 due to race condition!
 
             threads = []
-            for _ in range(10):
+            for _ in range(100):
                 t = threading.Thread(target=increment)
                 t.start()
                 threads.append(t)
@@ -486,20 +491,22 @@ class AppBackend:
             for t in threads:
                 t.join()
 
-            results.append(f"Without lock: {counter} (expected 10000)")
+            results.append(f"Without lock: {counter} (expected 1000000)")
 
-            # With lock
+            # --------------------------------------------------------------------------------
+            # With lock (to prevent race condition)
+            # ---------------------------------------------------------------------------------
             counter = 0
             lock = threading.Lock()
 
             def increment_safe():
                 nonlocal counter
-                for _ in range(1000):
-                    with lock:
-                        counter += 1
+                for _ in range(10000):
+                    with lock:          # ← LOCK protects critical section
+                        counter += 1    # ← Now thread-safe
 
             threads = []
-            for _ in range(10):
+            for _ in range(100):
                 t = threading.Thread(target=increment_safe)
                 t.start()
                 threads.append(t)
@@ -507,7 +514,7 @@ class AppBackend:
             for t in threads:
                 t.join()
 
-            results.append(f"With lock: {counter} (expected 10000)")
+            results.append(f"With lock: {counter} (expected 1000000)")
             return results, 0.0
 
         return await asyncio.to_thread(sync_run)
