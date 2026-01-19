@@ -20,13 +20,11 @@ class ConcurrencyFrontend:
 
         self.min_iterations = 1000
         self.max_iterations = 10000000
-        # self.current_iterations = 4000000
-        self.current_iterations = 1000
+        self.current_iterations = 4000000
 
         self.min_tasks = 1
         self.max_tasks = 20
-        # self.current_tasks = 4
-        self.current_tasks = 20
+        self.current_tasks = 4
 
         #region ui elements
         self.task_type = None
@@ -71,7 +69,8 @@ class ConcurrencyFrontend:
                 self.task_type = ui.select(
                     options=self.task_choices,
                     value='CPU Intensive',
-                    label='Task Type'
+                    label='Task Type',
+                    on_change=self.on_task_type_changed
                 ).classes('w-full')
 
                 # Two cards side by side in a row
@@ -214,6 +213,23 @@ class ConcurrencyFrontend:
         """Show a dialog with the number of CPU cores."""
         text = f'({self.backend.number_of_cores_text} CPU cores detected)'
         return text
+
+    def on_task_type_changed(self):
+        """Handle task type change and update default settings."""
+        selected_task = self.task_type.value
+        self.update_task_settings(selected_task)
+
+    def update_task_settings(self, task_type: str) -> None:
+        """Update default settings based on selected task type."""
+        if task_type == 'CPU Intensive':
+            self.iterations.set_value(4000000)
+            self.num_tasks.set_value(4)
+        elif task_type == 'IO Intensive':
+            self.iterations.set_value(1000)
+            self.num_tasks.set_value(20)
+        elif task_type == 'Mixed':
+            self.iterations.set_value(1000000)
+            self.num_tasks.set_value(8)
 
     def get_task_function(self):
         """Return a module-level function (pickle-able) for the selected task type."""
