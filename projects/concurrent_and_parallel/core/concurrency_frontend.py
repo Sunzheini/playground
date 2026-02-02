@@ -1,5 +1,6 @@
 """
-Frontend for demonstrating Python concurrency methods using NiceGUI.
+Frontend for demonstrating Python concurrency methods using NiceGUI. Uses the backend for
+actual task execution.
 """
 import time
 from datetime import datetime
