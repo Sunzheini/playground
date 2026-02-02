@@ -1,3 +1,8 @@
+"""
+A simple Windows Forms application using Python.NET
+This example demonstrates how to create a basic Windows Forms application
+with a button that shows a message box when clicked.
+"""
 # importing windows c# dll
 
 import clr
