@@ -1,4 +1,6 @@
 """
+Here we invoke a lambda function named `ReportGenerator` in AWS.
+
 # install AWS CLI
 # verify in cmd: `aws --version`
 
@@ -45,7 +47,7 @@ def invoke_report_generator():
     }
 
     try:
-        print("🚀 Invoking ReportGenerator Lambda...")
+        print(" Invoking ReportGenerator Lambda...")
 
         # Invoke the Lambda
         response = lambda_client.invoke(
@@ -56,21 +58,21 @@ def invoke_report_generator():
 
         response_payload = json.loads(response['Payload'].read())
 
-        print("✅ Lambda invoked successfully!")
+        print(" Lambda invoked successfully!")
         print(f"   Status: {response_payload.get('status', 'unknown')}")
         print(f"   Message: {response_payload.get('message', 'No message')}")
 
         if 'file_name' in response_payload:
             print(f"   File to be created: {response_payload['file_name']}")
 
-        print(f"\n📊 Response details:")
+        print(f"\n Response details:")
         print(f"   Status Code: {response['StatusCode']}")
         print(f"   Executed Version: {response.get('ExecutedVersion', '$LATEST')}")
 
         return response_payload
 
     except Exception as e:
-        print(f"❌ Error invoking Lambda: {str(e)}")
+        print(f" Error invoking Lambda: {str(e)}")
         return None
 
 
@@ -79,4 +81,4 @@ if __name__ == "__main__":
     result = invoke_report_generator()
 
     if result and result.get('status') == 'success':
-        print("\n🎉 Success! Check your S3 bucket in a few seconds:")
+        print("\n Success! Check your S3 bucket in a few seconds:")
