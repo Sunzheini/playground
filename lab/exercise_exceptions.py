@@ -1,8 +1,6 @@
 """
 Custom Exception Showcase: Creating and Using Custom Exceptions in Python
 """
-
-
 # ============= STEP 1: Define Base Custom Exception =============
 class PaymentProcessingError(Exception):
     """Base custom exception for payment-related errors."""
