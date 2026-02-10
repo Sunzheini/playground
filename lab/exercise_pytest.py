@@ -1,5 +1,23 @@
+"""
+This file demonstrates how to use pytest for testing a simple Calculator class. It includes
+examples of fixtures, parametrized tests, exception testing, and more.
 
-
+pytest vs unittest:
+- pytest is more concise and has powerful features like fixtures and parametrization.
+- pytest has better support for test discovery and more informative failure reports.
+- pytest allows for more flexible test organization and supports a wider range of testing styles.
+- pytest has a rich ecosystem of plugins for additional functionality (e.g., coverage, parallel
+testing).
+- pytest is generally more popular in the Python community for new projects, while unittest is often
+used in legacy codebases or when a more traditional testing style is preferred.
+- pytest uses simple assert statements for test assertions, while unittest requires specific
+assertion methods (e.g., self.assertEqual).
+- pytest allows for more dynamic test generation and parameterization, while unittest typically
+requires more boilerplate code for similar functionality.
+- pytest has a more flexible fixture system that can be used for setup and teardown, while unittest
+relies on setUp and tearDown methods within test classes.
+- unittest is part of the standard library and follows a more traditional xUnit style.
+"""
 import pytest
 
 
