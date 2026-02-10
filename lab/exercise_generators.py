@@ -14,6 +14,7 @@ print(next(counter))  # 5
 # print(next(counter))  # Raises StopIteration error when max is exceeded
 
 
+# ----------------------------------------------------------------------------------------------
 def fibonacci():
     a, b = 0, 1
     while True:
