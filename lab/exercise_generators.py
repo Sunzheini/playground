@@ -13,9 +13,15 @@ class SquareIterator:
         self.current = 0
 
     def __iter__(self):
+        """
+        Returns the iterator object itself. This is required for the iterator protocol.
+        """
         return self
 
     def __next__(self):
+        """
+        Returns the next value in the sequence (current squared) or raises StopIteration when done.
+        """
         if self.current >= self.n:
             raise StopIteration
         result = self.current ** 2
@@ -43,7 +49,14 @@ for num in generator:
     print(f"Square: {num}")
 
 # Both output: 0, 1, 4, 9, 16
-
+"""
+# Differences:
+- The iterator class requires more boilerplate code (init, iter, next methods).
+- The generator function uses 'yield' to produce values lazily, making it more concise and easier to read.
+- Generators automatically handle the StopIteration exception when they are exhausted, while iterators require explicit handling.
+- Generators can maintain state between yields without needing to manage it manually, while iterators require explicit state management.
+- Generators can be used in a more functional style (e.g., generator expressions), while iterators are typically used in an object-oriented style.
+"""
 
 # ---------------------------------------------------------------------------------------
 # Basic Generator Function

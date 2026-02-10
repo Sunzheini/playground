@@ -12,7 +12,7 @@ testing).
 used in legacy codebases or when a more traditional testing style is preferred.
 - pytest uses simple assert statements for test assertions, while unittest requires specific
 assertion methods (e.g., self.assertEqual).
-- pytest allows for more dynamic test generation and parameterization, while unittest typically
+- pytest allows for more dynamic test generation and parametrization, while unittest typically
 requires more boilerplate code for similar functionality.
 - pytest has a more flexible fixture system that can be used for setup and teardown, while unittest
 relies on setUp and tearDown methods within test classes.
