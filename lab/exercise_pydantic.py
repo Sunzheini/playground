@@ -97,19 +97,45 @@ except ValidationError as e:
 # ============================================================================
 # 5. MODEL_VALIDATOR (Validate entire model)
 # ============================================================================
+
+# 5a. BEFORE mode - validates/transforms raw input data before parsing
+class UserRegistration(BaseModel):
+    username: str
+    password: str
+    confirm_password: str
+
+    @model_validator(mode='before')
+    @classmethod
+    def check_passwords_match(cls, data: dict) -> dict:
+        """Validates raw input before Pydantic processes it"""
+        if isinstance(data, dict):
+            pwd = data.get('password')
+            confirm = data.get('confirm_password')
+            if pwd and confirm and pwd != confirm:
+                raise ValueError('Passwords do not match')
+        return data
+
+try:
+    reg = UserRegistration(username="john", password="secret123", confirm_password="secret123")
+    print(f"\n5a. Model validator (before): User '{reg.username}' registered")
+except ValidationError as e:
+    print(f"Validation error: {e}")
+
+# 5b. AFTER mode - validates the model after all fields are parsed
 class DateRange(BaseModel):
     start_date: int
     end_date: int
 
     @model_validator(mode='after')
     def check_dates(self) -> 'DateRange':
+        """Validates the model after all fields are parsed"""
         if self.end_date < self.start_date:
             raise ValueError('end_date must be after start_date')
         return self
 
 try:
     date_range = DateRange(start_date=20250101, end_date=20250201)
-    print(f"\n5. Model validator passed: {date_range.start_date} to {date_range.end_date}")
+    print(f"5b. Model validator (after): {date_range.start_date} to {date_range.end_date}")
 except ValidationError as e:
     print(f"Model validation error: {e}")
 
