@@ -42,6 +42,9 @@ print(D.__mro__)
 # (<class '__main__.D'>, <class '__main__.B'>, <class '__main__.C'>, <class '__main__.A'>, <class 'object'>)
 
 
+# --------------------------------------------------------------------------------------
+# Multiple Inheritance and MRO
+# --------------------------------------------------------------------------------------
 class Vehicle:
     def __init__(self, name):
         self.name = name
@@ -76,3 +79,97 @@ class AmphibiousVehicle:
     @property
     def type(self):
         return self.boat.type
+
+
+# --------------------------------------------------------------------------------------
+# super() with Different Signatures
+# --------------------------------------------------------------------------------------
+class A:
+    def show(self):
+        print("A", end=" ")
+
+
+class B(A):
+    def show(self):
+        print("B", end=" ")
+        super().show()
+
+
+class C(A):
+    def show(self):
+        print("C", end=" ")
+        super().show()
+
+
+class D(B, C):
+    def show(self):
+        print("D", end=" ")
+        super().show()
+
+
+d = D()
+d.show()  # D B C A
+print()  # Newline
+print(D.__mro__)  # (D, B, C, A, object)
+
+
+# --------------------------------------------------------------------------------------
+# MRO and Multiple Inheritance Conflicts
+# --------------------------------------------------------------------------------------
+class X:
+    def method(self):
+        print("X")
+
+class Y:
+    def method(self):
+        print("Y")
+
+class Z(X, Y):
+    pass
+
+class W(Y, X):
+    pass
+
+z = Z()
+z.method()  # "X" - order matters!
+
+w = W()
+w.method()  # "Y" - order matters!
+
+print(Z.__mro__)  # (Z, X, Y, object)
+print(W.__mro__)  # (W, Y, X, object)
+
+
+# ----------------------------------------------------------------------------------------
+# The "Diamond" Problem with Different Methods
+# ----------------------------------------------------------------------------------------
+class Grandparent:
+    def method(self):
+        print("Grandparent")
+
+
+class Parent1(Grandparent):
+    def method(self):
+        print("Parent1")
+        super().method()
+
+
+class Parent2(Grandparent):
+    def method(self):
+        print("Parent2")
+        super().method()
+
+
+class Child(Parent1, Parent2):
+    def method(self):
+        print("Child")
+        super().method()
+
+
+c = Child()
+c.method()
+# Output:
+# Child
+# Parent1
+# Parent2
+# Grandparent
