@@ -45,43 +45,34 @@ print(D.__mro__)
 class Vehicle:
     def __init__(self, name):
         self.name = name
-        print(f"Vehicle init: {name}")
 
 
 class Car(Vehicle):
     def __init__(self, name, wheels):
-        super().__init__(name)  # Uses MRO to find next __init__
+        super().__init__(name)
         self.wheels = wheels
-        print(f"Car init: {wheels} wheels")
 
 
 class Boat(Vehicle):
     def __init__(self, name, type):
         super().__init__(name)
         self.type = type
-        print(f"Boat init: {type}")
 
 
-class AmphibiousVehicle(Car, Boat):
+# Composition instead of multiple inheritance
+class AmphibiousVehicle:
     def __init__(self, name, wheels, type):
-        super().__init__(name, wheels)  # Wait, what about type?
-        # super() follows MRO!
+        self.car = Car(name, wheels)
+        self.boat = Boat(name, type)
 
+    @property
+    def name(self):
+        return self.car.name  # or self.boat.name
 
-av = AmphibiousVehicle("Duck", 4, "sailing")
-# Output shows the MRO in action
+    @property
+    def wheels(self):
+        return self.car.wheels
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @property
+    def type(self):
+        return self.boat.type
