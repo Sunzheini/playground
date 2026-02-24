@@ -17,6 +17,12 @@ requires more boilerplate code for similar functionality.
 - pytest has a more flexible fixture system that can be used for setup and teardown, while unittest
 relies on setUp and tearDown methods within test classes.
 - unittest is part of the standard library and follows a more traditional xUnit style.
+
+For most projects, you'll begin by creating a conftest.py file in your tests directory. This
+file is automatically discovered by pytest and acts as a built-in, project-specific plugin. It's
+the perfect place to define custom fixtures, hooks, and configuration that you want to be available
+across all your test files. By using conftest.py, you can keep your test code clean and organized
+while still having access to powerful setup and teardown functionality provided by fixtures.
 """
 import pytest
 
