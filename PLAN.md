@@ -1,7 +1,6 @@
 # Plan
 
 ## General
-complexity by time and space
 class as a key, __hash__
 hashing
 
