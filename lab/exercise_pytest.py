@@ -17,6 +17,13 @@ requires more boilerplate code for similar functionality.
 - pytest has a more flexible fixture system that can be used for setup and teardown, while unittest
 relies on setUp and tearDown methods within test classes.
 - unittest is part of the standard library and follows a more traditional xUnit style.
+"""
+
+"""
+At its heart, pytest is built on a plugin system powered by a library called pluggy . This means 
+that almost every feature of pytest—from test discovery to reporting—is implemented as a plugin. 
+This architecture allows you to intercept and modify pytest's behavior at specific points in the 
+test lifecycle using "hook functions"
 
 For most projects, you'll begin by creating a conftest.py file in your tests directory. This
 file is automatically discovered by pytest and acts as a built-in, project-specific plugin. It's
