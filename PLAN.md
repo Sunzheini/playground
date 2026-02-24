@@ -2,7 +2,6 @@
 
 ## General
 complexity by time and space
-extending pytest
 class as a key, __hash__
 hashing
 
