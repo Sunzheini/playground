@@ -2,8 +2,6 @@
 
 ## General
 complexity by time and space
-Multimodal LLMs?
-MRO
 extending pytest
 class as a key, __hash__
 hashing
@@ -31,6 +29,7 @@ ci/cd
 
 ## Enhance CustomLLM
 mcp
+Multimodal LLMs?
 a2a
 
 ## Video
