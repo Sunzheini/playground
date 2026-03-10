@@ -1,4 +1,4 @@
-# First deploy locally with Docker Compose, then push to Docker Hub and pull on AWS EC2. This guide covers both local development and AWS deployment.
+# EmployeeFastApiPython
 
 ---
 
@@ -181,6 +181,55 @@ The `.env` file must use:
 
 ---
 
+## Schema Migrations (changing the database without losing data)
+
+Every time you change the database schema (add a column, add a table, rename something),
+you write **one small `.sql` file** in the `migrations/` folder. That's it.
+
+On every container start, `migrate.py` runs automatically before the app starts.
+It checks which files have already been applied and only runs the new ones.
+**Existing data rows are never touched.**
+
+### How to make a schema change
+
+**1. Create a new migration file** — name it with the next number:
+```
+migrations/
+  001_initial_schema.sql   ← already exists (baseline)
+  002_add_is_active_to_employees.sql   ← your new file
+```
+
+**2. Write only the change** inside that file, for example:
+```sql
+ALTER TABLE "Hr"."Employees" ADD COLUMN "IsActive" BOOLEAN NOT NULL DEFAULT TRUE;
+```
+
+**3. Deploy as normal** — the migration runs automatically on container start:
+```powershell
+# Local
+docker compose up --build -d
+
+# EC2 (after pushing image)
+docker pull sunzheini1407/employee-fastapi:latest
+docker compose up -d
+```
+
+That's all. The runner will log `[migrate] Applying 002_...` and mark it done.
+Next time it starts, it sees it's already applied and skips it.
+
+---
+
+### Bootstrap status
+
+| Environment | Status |
+|-------------|--------|
+| Local       | ✅ Done — `001_initial_schema.sql` applied and recorded automatically on first container start |
+| EC2         | ✅ Automatic — `migrate.py` will handle it on first `docker compose up -d`, no manual steps needed |
+
+> ℹ️ `migrate.py` creates the `schema_migrations` table, runs `001_initial_schema.sql` (`SELECT 1;` — harmless), and records it as done — all on its own. Nothing to run manually on any environment.
+
+---
+
 ## Troubleshooting
 
 ### `no space left on device` error during `docker pull` on EC2
@@ -216,5 +265,3 @@ docker compose up -d
 3. Select the instance → **Associate**
 
 The Elastic IP will never change even after restarts.
-
-
