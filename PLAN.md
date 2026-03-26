@@ -1,7 +1,10 @@
 ## Django
-DB
 DB Extract
 Excel reading
+
+remove celery, AWS
+DB Full
+
 Endpoints
 
 
