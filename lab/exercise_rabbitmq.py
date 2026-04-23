@@ -162,3 +162,6 @@ if __name__ == "__main__":
     consumer_thread.join(timeout=3)
 
     print("\nAll done!")
+
+
+# https://www.youtube.com/watch?v=jXBd0jP6EoE&list=PLalrWAGybpB-UHbRDhFsBgXJM1g6T4IvO&index=9
