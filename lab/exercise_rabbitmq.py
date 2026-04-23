@@ -129,7 +129,6 @@ def run_consumer_wrapper(consumer: RabbitMQConsumer, queue_name: str):
         consumer.close_connection()
 
 
-
 if __name__ == "__main__":
     queue_name = 'letterbox'
 
