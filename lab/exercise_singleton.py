@@ -3,11 +3,15 @@ class SingletonInterface:
     _INSTANCE = None
     _INITIALIZED = False
 
+    # __new__ is responsible for creating a new instance of the class. It checks if an instance
+    # already exists and returns it if it does, otherwise it creates a new one.
     def __new__(cls, *args, **kwargs):
         if cls._INSTANCE is None:
             cls._INSTANCE = super().__new__(cls)
         return cls._INSTANCE
 
+    # __init__ is responsible for initializing the instance. It checks if the instance has already
+    # been initialized to prevent reinitialization.
     def __init__(self, *args, **kwargs):
         if not self._INITIALIZED:
             self._INITIALIZED = True

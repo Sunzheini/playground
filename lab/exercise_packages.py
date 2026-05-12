@@ -29,7 +29,9 @@ from shared_lib.redis_management.redis_manager import RedisManager
 `
 
 6. in services/api-gateway-service/pyproject.toml add:
-`"shared-lib @ file:///D:/Study/Projects/Github/AegisAI/shared-lib"`
+`
+"shared-lib @ file:///D:/Study/Projects/Github/AegisAI/shared-lib"
+`
 at the end of the `dependencies` list
 7. in services/api-gateway-service/ run:
 `poetry lock` and `poetry install --no-root`,
