@@ -6,6 +6,10 @@ You can check status with pgadmin docker container:
 http://localhost:5050/
 user: admin@admin.com, pass: admin
 -> fastapi_db -> Schema -> public -> Tables -> Users -> Right click -> View/Edit Data
+
+When installed postgres on windows:
+Database superuser: postgres
+Database password: password
 """
 import os
 import hashlib
